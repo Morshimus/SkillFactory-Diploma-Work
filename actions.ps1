@@ -97,7 +97,7 @@ function ansible {
         [Parameter(Mandatory=$False)]
         [String]$invFile = "./yandex_cloud.ini",
         [Parameter(Mandatory=$False)]
-        [String]$privateKey = "~/.ssh/morsh_server_SSH",
+        [String]$privateKey = "~/.ssh/SSH_KEY_FINAL",
         [Parameter(Mandatory=$False,Position=0)]
         [String]$args
     )
@@ -114,11 +114,11 @@ function ansiblePlaybook {
         [Parameter(Mandatory=$False)]
         [String]$invFile = "./yandex_cloud.ini",
         [Parameter(Mandatory=$False)]
-        [String]$privateKey = "~/.ssh/morsh_server_SSH",
+        [String]$privateKey = "~/.ssh/SSH_KEY_FINAL",
         [Parameter(Mandatory=$False)]
         [String]$Playbook = "./provisioning.yaml",
         [Parameter(Mandatory=$False,Position=0)]
-        [string]$fileSecrets = '~/.vault_pass_B11',
+        [string]$fileSecrets = '~/.vault_pass_diploma',
         [Parameter(Mandatory=$False,Position=0)]
         [switch]$tagTST,
         [Parameter(Mandatory=$False,Position=0)]
@@ -148,7 +148,7 @@ function ansibleVault {
         [Parameter(Mandatory=$False,Position=0)]
         [switch]$ask,
         [Parameter(Mandatory=$False,Position=0)]
-        [string]$fileSecrets = '~/.vault_pass_B11'
+        [string]$fileSecrets = '~/.vault_pass_diploma'
 
     )
     

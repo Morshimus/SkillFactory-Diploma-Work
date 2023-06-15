@@ -26,11 +26,11 @@ resource "yandex_vpc_subnet" "morsh-subnet-a" {
 ####################################################
 
 module "k8s-node-control-plane" {
-    source = "git::https://github.com/Morshimus/yandex-cloud-instance-module?ref=tags/1.0.0"
+    source = "git::https://github.com/Morshimus/yandex-cloud-instance-module?ref=tags/1.1.2"
 
-#  for_each = toset(["001", "002", "003"])
+  for_each = var.k8s_node_cp.name
 
-  source_image_family = "ubuntu-22-04-lts"
+  source_image_family = "ubuntu-2204-lts"
   boot_disk = {
     initialize_params = {
       size = var.os_disk_size
@@ -47,20 +47,22 @@ module "k8s-node-control-plane" {
   ]
 
 
-  prefix      = "k8s-polar-cp"
+  prefix      = each.value
   postfix     = each.key
   vm_vcpu_qty = 4
   vm_ram_qty  = 8
-  adm_pub_key = tls_private_key.key.public_key_openssh
+  cloud-init = local.cloud-init
   useros      = var.useros
+  adm_prv_key = tls_private_key.key.private_key_openssh
+
 }
 
 module "k8s-node-worker" {
-    source = "git::https://github.com/Morshimus/yandex-cloud-instance-module?ref=tags/1.0.0"
+    source = "git::https://github.com/Morshimus/yandex-cloud-instance-module?ref=tags/1.1.2"
 
-#  for_each = toset(["001", "002", "003"])
+  for_each = var.k8s_node_worker.name
 
-  source_image_family = "ubuntu-22-04-lts"
+  source_image_family = "ubuntu-2204-lts"
   boot_disk = {
     initialize_params = {
       size = var.os_disk_size
@@ -77,20 +79,21 @@ module "k8s-node-worker" {
   ]
 
 
-  prefix      = "k8s-polar-worker"
+  prefix      = each.value
   postfix     = each.key
   vm_vcpu_qty = 4
   vm_ram_qty  = 8
-  adm_pub_key = tls_private_key.key.public_key_openssh
+  cloud-init = local.cloud-init
   useros      = var.useros
+  adm_prv_key = tls_private_key.key.private_key_openssh
 }
 
 module "k8s-outside-servers" {
-    source = "git::https://github.com/Morshimus/yandex-cloud-instance-module?ref=tags/1.0.0"
+    source = "git::https://github.com/Morshimus/yandex-cloud-instance-module?ref=tags/1.1.2"
 
- # for_each = toset(["001", "002", "003"])
+  for_each = var.k8s_outside_srv.name
 
-  source_image_family = "ubuntu-22-04-lts"
+  source_image_family = "ubuntu-2204-lts"
   boot_disk = {
     initialize_params = {
       size = var.os_disk_size
@@ -107,12 +110,13 @@ module "k8s-outside-servers" {
   ]
 
 
-  prefix      = "k8s-external-srv"
+  prefix      = each.value
   postfix     = each.key
   vm_vcpu_qty = 4
   vm_ram_qty  = 8
-  adm_pub_key = tls_private_key.key.public_key_openssh
+  cloud-init = local.cloud-init
   useros      = var.useros
+  adm_prv_key = tls_private_key.key.private_key_openssh
 }
 
 
@@ -133,5 +137,10 @@ resource "tls_private_key" "key" {
 
 resource "local_file" "private_key" {
   content  = tls_private_key.key.private_key_pem
-  filename = "${path.module}/SSH_KEY_42"
+  filename = "${path.module}/SSH_KEY_FINAL"
+}
+
+resource "local_file" "yandex_inventory" {
+  content  = local.ansible_template
+  filename = "${path.module}/yandex_cloud.ini"
 }
