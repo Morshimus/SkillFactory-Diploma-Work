@@ -33,6 +33,14 @@ function init {
     }
 }
 
+function kubespray {
+   
+   docker run --rm -it --mount type=bind,source=$((Get-location).path)/inventory/sample,dst=/inventory `
+   --mount type=bind,source=$((Get-location).path)/SSH_KEY_FINAL,dst=/root/.ssh/id_rsa `
+   quay.io/kubespray/kubespray:v2.22.1 /bin/bash -c 'chmod 0600 /root/.ssh/id_rsa && ansible-playbook -i /inventory/inventory.ini --private-key /root/.ssh/id_rsa cluster.yml'
+
+}
+
 function apply {
     param (
         [Parameter(Mandatory=$false, Position=0)]

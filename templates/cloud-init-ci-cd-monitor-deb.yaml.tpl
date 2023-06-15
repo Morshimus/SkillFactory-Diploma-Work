@@ -17,3 +17,10 @@ runcmd:
   - systemctl enable docker
   - systemctl start docker
   - usermod -aG docker ${useros}
+  
+power_state:
+ delay: "+1"
+ mode: reboot
+ message: Reboot
+ timeout: 1
+ condition: True

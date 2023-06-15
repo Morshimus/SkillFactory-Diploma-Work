@@ -42,7 +42,6 @@ module "k8s-node-control-plane" {
     {
       subnet_id      = yandex_vpc_subnet.morsh-subnet-a.id
       nat            = true
-  #    nat_ip_address = each.key == "001" ? yandex_vpc_address.morsh-addr-pub_1.external_ipv4_address[0].address : each.key == "002" ? yandex_vpc_address.morsh-addr-pub_2.external_ipv4_address[0].address : yandex_vpc_address.morsh-addr-pub_3.external_ipv4_address[0].address
     }
   ]
 
@@ -51,7 +50,8 @@ module "k8s-node-control-plane" {
   postfix     = each.key
   vm_vcpu_qty = 4
   vm_ram_qty  = 8
-  cloud-init = local.cloud-init
+  cloud-init = local.cloud-init-k8s-node-deb
+  #cloud-init = local.cloud-init
   useros      = var.useros
   adm_prv_key = tls_private_key.key.private_key_openssh
 
@@ -74,7 +74,6 @@ module "k8s-node-worker" {
     {
       subnet_id      = yandex_vpc_subnet.morsh-subnet-a.id
       nat            = true
-  #    nat_ip_address = each.key == "001" ? yandex_vpc_address.morsh-addr-pub_1.external_ipv4_address[0].address : each.key == "002" ? yandex_vpc_address.morsh-addr-pub_2.external_ipv4_address[0].address : yandex_vpc_address.morsh-addr-pub_3.external_ipv4_address[0].address
     }
   ]
 
@@ -83,7 +82,8 @@ module "k8s-node-worker" {
   postfix     = each.key
   vm_vcpu_qty = 4
   vm_ram_qty  = 8
-  cloud-init = local.cloud-init
+  cloud-init = local.cloud-init-k8s-node-deb
+  #cloud-init = local.cloud-init
   useros      = var.useros
   adm_prv_key = tls_private_key.key.private_key_openssh
 }
@@ -105,7 +105,6 @@ module "k8s-outside-servers" {
     {
       subnet_id      = yandex_vpc_subnet.morsh-subnet-a.id
       nat            = true
-  #    nat_ip_address = each.key == "001" ? yandex_vpc_address.morsh-addr-pub_1.external_ipv4_address[0].address : each.key == "002" ? yandex_vpc_address.morsh-addr-pub_2.external_ipv4_address[0].address : yandex_vpc_address.morsh-addr-pub_3.external_ipv4_address[0].address
     }
   ]
 
@@ -114,7 +113,7 @@ module "k8s-outside-servers" {
   postfix     = each.key
   vm_vcpu_qty = 4
   vm_ram_qty  = 8
-  cloud-init = local.cloud-init
+  cloud-init = local.cloud-init-ci-cd-monitor-deb
   useros      = var.useros
   adm_prv_key = tls_private_key.key.private_key_openssh
 }
@@ -142,5 +141,5 @@ resource "local_file" "private_key" {
 
 resource "local_file" "yandex_inventory" {
   content  = local.ansible_template
-  filename = "${path.module}/yandex_cloud.ini"
+  filename = "${path.module}/inventory/sample/inventory.ini"
 }

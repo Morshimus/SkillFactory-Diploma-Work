@@ -10,8 +10,14 @@ locals {
     useros      = var.useros
     }
     )
-     k8s_cluster_cp_name =  {for i in keys(var.k8s_node_cp.name) : "${i}" => module.k8s-node-control-plane["${i}"].hostname_server }
-     k8s_cluster_worker_name = {for i in keys(var.k8s_node_worker.name) : "${i}" => module.k8s-node-worker["${i}"].hostname_server }
+    cloud-init-ci-cd-monitor-deb = templatefile("${path.module}/templates/cloud-init-ci-cd-monitor-deb.yaml.tpl", {
+    adm_pub_key = tls_private_key.key.public_key_openssh
+    useros      = var.useros
+    }
+    )
+    
+    k8s_cluster_cp_name =  {for i in keys(var.k8s_node_cp.name) : "${i}" => module.k8s-node-control-plane["${i}"].hostname_server }
+    k8s_cluster_worker_name = {for i in keys(var.k8s_node_worker.name) : "${i}" => module.k8s-node-worker["${i}"].hostname_server }
      
   ansible_template = templatefile(
     "${path.module}/templates/ansible_inventory_template.tpl",
