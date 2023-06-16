@@ -1,6 +1,6 @@
 [all]
 %{ for index, node in k8s_cluster_node_name ~}
-${node}  ansible_host=${lookup(k8s_cluster_node_ip, index, 0 )} ansible_user=${user} %{ if lookup(etcd_member_name,  index , false) != false }etcd_member_name=etcd${index}%{ else }%{ endif }
+${node}  ansible_host=${lookup(k8s_cluster_node_ip, index, 0 )} ansible_user=${user} ansible_become=yes %{ if lookup(etcd_member_name,  index , false) != false }etcd_member_name=etcd${index}%{ else }%{ endif }
 %{ endfor ~}
 
 %{ if bastion_member_name != null}
@@ -13,7 +13,7 @@ ${node}  ansible_host=${lookup(k8s_cluster_node_ip, index, 0 )} ansible_user=${u
 %{ else }
 %{ endif }
 
-[kube_control_plane]
+[kube-master]
 %{ for index, node in k8s_cluster_cp_name ~}
 ${node}
 %{ endfor ~}
@@ -26,23 +26,23 @@ ${node}
 %{ endif }
 %{ endfor ~}
 
-[kube_node]
+[kube-node]
 %{ for index, node in k8s_cluster_worker_name ~}
 ${node}
 %{ endfor ~}
 
 
-[calico_rr]
+[calico-rr]
 
-[k8s_cluster:children]
-kube_control_plane
-kube_node
-calico_rr
+[k8s-cluster:children]
+kube-master
+kube-node
+calico-rr
 
 %{ if monitoring_member_name != null}
 [monitoring]
 %{ for index, server in external_servers_name ~}
-%{ if lookup(monitoring_member_name ,  index , false) != false }${server} ansible_host=${lookup(external_servers_ip, index, 0)} ansible_user=${user}
+%{ if lookup(monitoring_member_name ,  index , false) != false }${server} ansible_host=${lookup(external_servers_ip, index, 0)} ansible_user=${user} ansible_become=yes
 %{ else }
 %{ endif }
 %{ endfor ~}
@@ -52,7 +52,7 @@ calico_rr
 %{ if ci_cd_member_name != null}
 [Jenkins-CI]
 %{ for index, server in external_servers_name ~}
-%{ if lookup(ci_cd_member_name ,  index , false) != false }${server} ansible_host=${lookup(external_servers_ip, index, 0)} ansible_user=${user}
+%{ if lookup(ci_cd_member_name ,  index , false) != false }${server} ansible_host=${lookup(external_servers_ip, index, 0)} ansible_user=${user} ansible_become=yes
 %{ else }
 %{ endif }
 %{ endfor ~}
