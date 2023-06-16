@@ -144,7 +144,22 @@ resource "local_file" "yandex_inventory" {
   filename = "${path.module}/inventory/sf-cluster/inventory.ini"
 
     provisioner "local-exec" {
-    command     = "Wait-Event -Timeout 120;wsl -e /bin/bash -c 'cp .vault_pass_diploma  ~/.vault_pass_diploma ; chmod 0600 ~/.vault_pass_diploma';wsl -e /bin/bash -c 'cp SSH_KEY_FINAL  ~/.ssh/SSH_KEY_FINAL ; chmod 0600 ~/.ssh/SSH_KEY_FINAL'; . ./actions.ps1;kubespray"
+    command     = <<EOF
+     Wait-Event -Timeout 120;
+     wsl -e /bin/bash -c 'cp .vault_pass_diploma  ~/.vault_pass_diploma ; chmod 0600 ~/.vault_pass_diploma';
+     wsl -e /bin/bash -c 'cp SSH_KEY_FINAL  ~/.ssh/SSH_KEY_FINAL ; chmod 0600 ~/.ssh/SSH_KEY_FINAL';
+     . ./actions.ps1;
+     kubespray; 
+     $ConnectionConf= gc $env:KUBECONFIG;
+     $ConnectionConf=$ConnectionConf  -replace "${lookup(local.k8s_cluster_cp_ip_priv, "ip", 0)}", "${lookup(local.k8s_cluster_cp_ip_pub, "ip", 0)}"; 
+     $ConnectionConf | Set-Content -Encoding UTF8 $env:KUBECONFIG; 
+     flux_bootstrap
+    EOF
     interpreter = ["powershell.exe", "-NoProfile", "-c"]
-  }
+
+    environment = {
+      GITHUB_TOKEN = data.ansiblevault_path.github-token.value
+      GITHUB_USER = data.ansiblevault_path.github-user.value
+    }
+  } 
 }
