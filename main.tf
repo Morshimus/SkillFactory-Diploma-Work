@@ -13,9 +13,9 @@ terraform {
       source  = "hashicorp/tls"
       version = "~> 4.0"
     }
-    helm = {
-      source  = "hashicorp/helm"
-      version = "~> 2.10"
+    ansiblevault = {
+          source  = "MeilleursAgents/ansiblevault"
+          version = "= 2.2.0"
     }
   }
   backend "s3" {
