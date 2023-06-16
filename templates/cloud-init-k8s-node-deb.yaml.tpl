@@ -18,12 +18,6 @@ packages:
   - snap
   - containerd
 
-runcmd:
- - modprobe br_netfilter # Load br_netfilter module.
- - snap install kubectl --classic && snap install kubeadm --classic && snap install  kubelet --classic
- - snap refresh --hold=forever kubectl && snap refresh --hold=forever kubeadm && snap refresh --hold=forever kubelet # pin kubelet kubeadm kubectl version
- - sysctl --system # Reload settings from all system configuration files to take iptables configuration
-
 power_state:
  delay: "+1"
  mode: reboot

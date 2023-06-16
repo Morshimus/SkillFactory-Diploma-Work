@@ -1,4 +1,19 @@
+if(!$env:GITHUB_TOKEN){$env:GITHUB_TOKEN= Read-host "Github token to sync"}
+if(!$env:GITHUB_USER){$env:GITHUB_USER= Read-host "Github User to sync"}
+$env:KUBECONFIG="$((Get-location).path)/inventory/sf-cluster/artifacts/admin.conf"
+
+Set-alias k  kubectl 
 Set-alias tf terraform
+
+function flux_bootstrap {
+
+    flux bootstrap github --insecure-skip-tls-verify `
+    --owner=$($env:GITHUB_USER) `
+    --repository=SkillFactory-Diploma-Work `
+    --branch=main `
+    --path=./clusters/sf-cluster `
+    --personal 
+}
 function init {
     Param ( 
      [Parameter(Mandatory=$false, Position=0)]
@@ -34,12 +49,21 @@ function init {
 }
 
 function kubespray {
-   
-   docker run --rm -it --mount type=bind,source=$((Get-location).path)/inventory/sample,dst=/inventory `
-   --mount type=bind,source=$((Get-location).path)/SSH_KEY_FINAL,dst=/root/.ssh/id_rsa `
+    param (
+        [Parameter(Mandatory=$false, Position=0)]
+        [switch]$Interactive,
+        [Parameter(Mandatory=$false, Position=0)]
+        [string]$ClusterInvFile="sf-cluster",
+        [Parameter(Mandatory=$false, Position=0)]
+        [String]$privateKey = "SSH_KEY_FINAL"       
+    )
+    
+    if($Interactive){$InteractiveFlag = "-it"}
+    
+   docker run --rm $InteractiveFlag --mount type=bind,source=$((Get-location).path)/inventory/$ClusterInvFile,dst=/inventory `
+   --mount type=bind,source=$((Get-location).path)/$privateKey,dst=/root/.ssh/id_rsa `
    quay.io/kubespray/kubespray:v2.22.1 /bin/bash -c `
    'chmod 0600 /root/.ssh/id_rsa && ansible-playbook -i /inventory/inventory.ini --private-key /root/.ssh/id_rsa cluster.yml'
-
 }
 
 function apply {

@@ -4,3 +4,9 @@ provider "yandex" {
   folder_id                = var.folder_id_yandex
   service_account_key_file = var.service_account_key_yandex
 }
+
+provider "helm" {
+  kubernetes {
+    config_path = "${path.module}/inventory/sf-cluster/artifacts/admin.conf"
+  }
+}

@@ -1,23 +1,23 @@
 ---
 # Kubernetes dashboard
 # RBAC required. see docs/getting-started.md for access details.
-# dashboard_enabled: false
+dashboard_enabled: true
 
 # Helm deployment
-helm_enabled: false
+helm_enabled: true
 
 # Registry deployment
-registry_enabled: false
-# registry_namespace: kube-system
-# registry_storage_class: ""
-# registry_disk_size: "10Gi"
+registry_enabled: true
+registry_namespace: kube-system
+registry_storage_class: ""
+registry_disk_size: "10Gi"
 
 # Metrics Server deployment
 metrics_server_enabled: false
-# metrics_server_container_port: 10250
-# metrics_server_kubelet_insecure_tls: true
-# metrics_server_metric_resolution: 15s
-# metrics_server_kubelet_preferred_address_types: "InternalIP,ExternalIP,Hostname"
+metrics_server_container_port: 10250
+metrics_server_kubelet_insecure_tls: true
+metrics_server_metric_resolution: 15s
+metrics_server_kubelet_preferred_address_types: "InternalIP,ExternalIP,Hostname"
 # metrics_server_host_network: false
 # metrics_server_replicas: 1
 
@@ -97,23 +97,23 @@ rbd_provisioner_enabled: false
 # rbd_provisioner_reclaim_policy: Delete
 
 # Nginx ingress controller deployment
-ingress_nginx_enabled: false
+ingress_nginx_enabled: true
 # ingress_nginx_host_network: false
 ingress_publish_status_address: ""
-# ingress_nginx_nodeselector:
-#   kubernetes.io/os: "linux"
-# ingress_nginx_tolerations:
-#   - key: "node-role.kubernetes.io/master"
-#     operator: "Equal"
-#     value: ""
-#     effect: "NoSchedule"
-#   - key: "node-role.kubernetes.io/control-plane"
-#     operator: "Equal"
-#     value: ""
-#     effect: "NoSchedule"
-# ingress_nginx_namespace: "ingress-nginx"
-# ingress_nginx_insecure_port: 80
-# ingress_nginx_secure_port: 443
+ingress_nginx_nodeselector:
+   kubernetes.io/os: "linux"
+ingress_nginx_tolerations:
+    - key: "node-role.kubernetes.io/master"
+      operator: "Equal"
+      value: ""
+      effect: "NoSchedule"
+    - key: "node-role.kubernetes.io/control-plane"
+      operator: "Equal"
+      value: ""
+      effect: "NoSchedule"
+ingress_nginx_namespace: "ingress-nginx"
+ingress_nginx_insecure_port: 80
+ingress_nginx_secure_port: 443
 # ingress_nginx_configmap:
 #   map-hash-bucket-size: "128"
 #   ssl-protocols: "TLSv1.2 TLSv1.3"
@@ -124,7 +124,7 @@ ingress_publish_status_address: ""
 # ingress_nginx_extra_args:
 #   - --default-ssl-certificate=default/foo-tls
 # ingress_nginx_termination_grace_period_seconds: 300
-# ingress_nginx_class: nginx
+ingress_nginx_class: nginx
 
 # ALB ingress controller deployment
 ingress_alb_enabled: false

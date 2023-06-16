@@ -141,5 +141,10 @@ resource "local_file" "private_key" {
 
 resource "local_file" "yandex_inventory" {
   content  = local.ansible_template
-  filename = "${path.module}/inventory/sample/inventory.ini"
+  filename = "${path.module}/inventory/sf-cluster/inventory.ini"
+
+    provisioner "local-exec" {
+    command     = "Wait-Event -Timeout 120;wsl -e /bin/bash -c 'cp .vault_pass_diploma  ~/.vault_pass_diploma ; chmod 0600 ~/.vault_pass_diploma';wsl -e /bin/bash -c 'cp SSH_KEY_FINAL  ~/.ssh/SSH_KEY_FINAL ; chmod 0600 ~/.ssh/SSH_KEY_FINAL'; . ./actions.ps1;kubespray"
+    interpreter = ["powershell.exe", "-NoProfile", "-c"]
+  }
 }
