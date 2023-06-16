@@ -3,11 +3,11 @@
 #                                                  #
 ####################################################
 variable "k8s_node_cp" {
-    type = object({
-       name = map(string),
-       etcd_member = map(bool)
-    })
-    description = <<-EOT
+  type = object({
+    name        = map(string),
+    etcd_member = map(bool)
+  })
+  description = <<-EOT
     Number of control plane nodes in k8s cluster. 
     For name:
       Key - is postfix
@@ -16,22 +16,22 @@ variable "k8s_node_cp" {
       Key - is name
       Value - is type
     EOT
-    default = {
-      name = {
-        "001" =  "k8s-cp-polar-"
-      },
-      etcd_member = {
-        "001" = true
-      }
+  default = {
+    name = {
+      "001" = "k8s-cp-polar-"
+    },
+    etcd_member = {
+      "001" = true
     }
+  }
 }
 
 variable "k8s_node_worker" {
-    type = object({
-       name = map(string)
-       etcd_member = map(bool)
-    })
-    description = <<-EOT
+  type = object({
+    name        = map(string)
+    etcd_member = map(bool)
+  })
+  description = <<-EOT
     Number of worker nodes in k8s cluster.
     For name:
       Key - is postfix
@@ -40,25 +40,25 @@ variable "k8s_node_worker" {
       Key - is name
       Value - is type
     EOT
-    default = {
-      name = {
-        "002" =  "k8s-worker-polar-"
-      },
-      etcd_member = {
-        "002" = false
-      }
-      
+  default = {
+    name = {
+      "002" = "k8s-worker-polar-"
+    },
+    etcd_member = {
+      "002" = false
     }
+
+  }
 }
 
 variable "k8s_outside_srv" {
-    type = object({
-       name = map(string)
-       ci-cd = map(bool)
-       monitoring = map(bool)
-       bastion   = map(bool)
-    })
-    description = <<-EOT
+  type = object({
+    name       = map(string)
+    ci-cd      = map(bool)
+    monitoring = map(bool)
+    bastion    = map(bool)
+  })
+  description = <<-EOT
     Number of external servers outside of k8s cluster.
     For name:
       Key - is postfix
@@ -73,18 +73,18 @@ variable "k8s_outside_srv" {
       Key - is name
       Value - is type     
     EOT
-    default = {
-      name = {
-        "003" =  "srv-ext-polar-"
-      },
-      ci-cd = {
-        "003" = true
-      },
-      monitoring = {
-        "003" = true
-      },
-      bastion = {}
-    }
+  default = {
+    name = {
+      "003" = "srv-ext-polar-"
+    },
+    ci-cd = {
+      "003" = true
+    },
+    monitoring = {
+      "003" = true
+    },
+    bastion = {}
+  }
 }
 
 

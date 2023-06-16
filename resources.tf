@@ -26,7 +26,7 @@ resource "yandex_vpc_subnet" "morsh-subnet-a" {
 ####################################################
 
 module "k8s-node-control-plane" {
-    source = "git::https://github.com/Morshimus/yandex-cloud-instance-module?ref=tags/1.1.2"
+  source = "git::https://github.com/Morshimus/yandex-cloud-instance-module?ref=tags/1.1.2"
 
   for_each = var.k8s_node_cp.name
 
@@ -40,8 +40,8 @@ module "k8s-node-control-plane" {
 
   network_interface = [
     {
-      subnet_id      = yandex_vpc_subnet.morsh-subnet-a.id
-      nat            = true
+      subnet_id = yandex_vpc_subnet.morsh-subnet-a.id
+      nat       = true
     }
   ]
 
@@ -50,7 +50,7 @@ module "k8s-node-control-plane" {
   postfix     = each.key
   vm_vcpu_qty = 4
   vm_ram_qty  = 8
-  cloud-init = local.cloud-init-k8s-node-deb
+  cloud-init  = local.cloud-init-k8s-node-deb
   #cloud-init = local.cloud-init
   useros      = var.useros
   adm_prv_key = tls_private_key.key.private_key_openssh
@@ -58,7 +58,7 @@ module "k8s-node-control-plane" {
 }
 
 module "k8s-node-worker" {
-    source = "git::https://github.com/Morshimus/yandex-cloud-instance-module?ref=tags/1.1.2"
+  source = "git::https://github.com/Morshimus/yandex-cloud-instance-module?ref=tags/1.1.2"
 
   for_each = var.k8s_node_worker.name
 
@@ -72,8 +72,8 @@ module "k8s-node-worker" {
 
   network_interface = [
     {
-      subnet_id      = yandex_vpc_subnet.morsh-subnet-a.id
-      nat            = true
+      subnet_id = yandex_vpc_subnet.morsh-subnet-a.id
+      nat       = true
     }
   ]
 
@@ -82,14 +82,14 @@ module "k8s-node-worker" {
   postfix     = each.key
   vm_vcpu_qty = 4
   vm_ram_qty  = 8
-  cloud-init = local.cloud-init-k8s-node-deb
+  cloud-init  = local.cloud-init-k8s-node-deb
   #cloud-init = local.cloud-init
   useros      = var.useros
   adm_prv_key = tls_private_key.key.private_key_openssh
 }
 
 module "k8s-outside-servers" {
-    source = "git::https://github.com/Morshimus/yandex-cloud-instance-module?ref=tags/1.1.2"
+  source = "git::https://github.com/Morshimus/yandex-cloud-instance-module?ref=tags/1.1.2"
 
   for_each = var.k8s_outside_srv.name
 
@@ -103,8 +103,8 @@ module "k8s-outside-servers" {
 
   network_interface = [
     {
-      subnet_id      = yandex_vpc_subnet.morsh-subnet-a.id
-      nat            = true
+      subnet_id = yandex_vpc_subnet.morsh-subnet-a.id
+      nat       = true
     }
   ]
 
@@ -113,7 +113,7 @@ module "k8s-outside-servers" {
   postfix     = each.key
   vm_vcpu_qty = 4
   vm_ram_qty  = 8
-  cloud-init = local.cloud-init-ci-cd-monitor-deb
+  cloud-init  = local.cloud-init-ci-cd-monitor-deb
   useros      = var.useros
   adm_prv_key = tls_private_key.key.private_key_openssh
 }
@@ -143,7 +143,7 @@ resource "local_file" "yandex_inventory" {
   content  = local.ansible_template
   filename = "${path.module}/inventory/sf-cluster/inventory.ini"
 
-    provisioner "local-exec" {
+  provisioner "local-exec" {
     command     = <<EOF
      Wait-Event -Timeout 120;
      wsl -e /bin/bash -c 'cp .vault_pass_diploma  ~/.vault_pass_diploma ; chmod 0600 ~/.vault_pass_diploma';
@@ -159,7 +159,7 @@ resource "local_file" "yandex_inventory" {
 
     environment = {
       GITHUB_TOKEN = data.ansiblevault_path.github-token.value
-      GITHUB_USER = data.ansiblevault_path.github-user.value
+      GITHUB_USER  = data.ansiblevault_path.github-user.value
     }
-  } 
+  }
 }
