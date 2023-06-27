@@ -86,6 +86,7 @@ resource "yandex_dns_recordset" "skillfactory" {
 #                                                  #
 ####################################################
 
+############ Main Listener##############
 module "internet-alb-project" {
 
   source = "git::https://github.com/Morshimus/terraform-yandex-cloud-application-load-balancer-module?ref=tags/1.1.1"
@@ -132,24 +133,7 @@ module "internet-alb-project" {
   }]
 }
 
-module "internet-alb-backend-project" {
-
-  source = "git::https://github.com/Morshimus/Terraform-Yandex-Cloud-Application-Load-Balancer-Backend-Group-Module?ref=tags/1.1.3"
-  
-  name = "internet-edge"
-  description = "Internet edge to K8S ingress and servers"
-}
-
-module "internet-alb-target-group-project" {
-  
-  source = "git::https://github.com/Morshimus/Terraform-Yandex-Cloud-Application-Load-Balancer-Target-Group-Module?ref=tags/1.1.1"
-
-   name = "internet-edge"
-   description = "Internet edge to K8S ingress and servers"
-   group = "internet-edge"
-
-}
-
+############ HTTP Router##############
 module "internet-alb-http-router-project" {
   
    source = "git::https://github.com/Morshimus/Terraform-Yandex-Cloud-Application-Load-Balancer-Http-Router-Module?ref=tags/1.1.0"
@@ -160,13 +144,74 @@ module "internet-alb-http-router-project" {
 
 }
 
-module "internet-alb-virtual-host-project" {
+############  Backends ##############
+
+module "internet-alb-backend-jenkins-project" {
+
+  source = "git::https://github.com/Morshimus/Terraform-Yandex-Cloud-Application-Load-Balancer-Backend-Group-Module?ref=tags/1.1.3"
+  
+  name = "jenkins"
+  description = "Internet edge to K8S ingress and servers"
+  group = "ci-cd"
+
+  http_backend =[{
+    name             = "jenkins"
+    port             = 8080
+    weight = 1
+    http2            = false
+    target_group_ids = [module.internet-alb-target-group-jenkins-project.id]
+    load_balancing_config = [{
+      panic_threshold = 0
+      locality_aware_routing_percent = 0
+      strict_locality = false
+      mode            = "ROUND_ROBIN"
+    }]
+  }]
+}
+
+############  Target Groups ##############
+module "internet-alb-target-group-jenkins-project" {
+  
+  source = "git::https://github.com/Morshimus/Terraform-Yandex-Cloud-Application-Load-Balancer-Target-Group-Module?ref=tags/1.1.1"
+
+   name = "jenkins"
+   description = "CI-CD"
+   group = "ci-cd"
+
+   target = [
+     for s in keys(var.k8s_outside_srv.name):
+     merge({ "ip_address" = module.k8s-outside-servers[s].internal_ip_address_server[0] }, {"subnet_id" = yandex_vpc_subnet.morsh-subnet-a.id })
+   ]
+
+}
+
+############  Virtual Hosts ##############
+module "internet-alb-virtual-host-jenkins-project" {
   
    source = "git::https://github.com/Morshimus/Terraform-Yandex-Cloud-Application-Load-Balancer-Virtual-Host-Module?ref=tags/1.0.0"
 
-   name = "internet-edge"
-
+   name = "jenkins"
+   authority = ["jenkins.polar.net.ru"]
    http_router_id = module.internet-alb-http-router-project.id
+
+   route = [ {
+     name = "jenkins"
+     http_route = [{
+        http_match = []
+        http_route_action = [{
+          backend_group_id  = module.internet-alb-backend-jenkins-project.id
+          timeout           = "60s"
+          host_rewrite      = null
+          auto_host_rewrite = null
+          prefix_rewrite    = null
+          upgrade_types     = []
+          idle_timeout      = null
+        }] 
+        redirect_action =[]
+        direct_response_action =[]   
+     }]
+     grpc_route =[]
+   } ]
 }
 
 ####################################################
@@ -318,8 +363,8 @@ module "k8s-node-control-plane" {
 
   prefix      = each.value
   postfix     = each.key
-  vm_vcpu_qty = 4
-  vm_ram_qty  = 8
+  vm_vcpu_qty = 2
+  vm_ram_qty  = 2
   cloud-init = local.cloud-init-k8s-node-deb
   #cloud-init = local.cloud-init
   useros      = var.useros
@@ -350,8 +395,8 @@ module "k8s-node-worker" {
 
   prefix      = each.value
   postfix     = each.key
-  vm_vcpu_qty = 4
-  vm_ram_qty  = 8
+  vm_vcpu_qty = 2
+  vm_ram_qty  = 2
   cloud-init = local.cloud-init-k8s-node-deb
   #cloud-init = local.cloud-init
   useros      = var.useros
@@ -382,7 +427,7 @@ module "k8s-outside-servers" {
   prefix      = each.value
   postfix     = each.key
   vm_vcpu_qty = 4
-  vm_ram_qty  = 8
+  vm_ram_qty  = 12
   cloud-init = local.cloud-init-ci-cd-monitor-deb
   useros      = var.useros
   adm_prv_key = tls_private_key.key.private_key_openssh
