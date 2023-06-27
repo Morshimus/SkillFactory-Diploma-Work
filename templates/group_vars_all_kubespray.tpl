@@ -12,9 +12,9 @@ override_system_hostname: false
 
 ## External LB example config
 ## apiserver_loadbalancer_domain_name: "elb.some.domain"
-#loadbalancer_apiserver:
-#   address: 192.168.21.14
-#   port: 8443
+loadbalancer_apiserver:
+   address: ${nlb_address}
+   port: 8443
 
 ## Internal loadbalancers for apiservers
 # loadbalancer_apiserver_localhost: true

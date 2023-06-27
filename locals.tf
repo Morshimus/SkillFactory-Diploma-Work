@@ -18,11 +18,25 @@ locals {
     }
   )
 
-  k8s_cluster_cp_name     = { for i in keys(var.k8s_node_cp.name) : "${i}" => module.k8s-node-control-plane["${i}"].hostname_server }
-  k8s_cluster_worker_name = { for i in keys(var.k8s_node_worker.name) : "${i}" => module.k8s-node-worker["${i}"].hostname_server }
+  k8s_cluster_cp_name     = { for i in keys(var.k8s_node_cp.name) : i => module.k8s-node-control-plane[i].hostname_server }
+  k8s_cluster_worker_name = { for i in keys(var.k8s_node_worker.name) : i => module.k8s-node-worker[i].hostname_server }
 
-  k8s_cluster_cp_ip_pub  = length(keys(var.k8s_node_cp.name)) == 1 ? { for i in keys(var.k8s_node_cp.name) : "ip" => module.k8s-node-control-plane["${i}"].external_ip_address_server[0] } : null
-  k8s_cluster_cp_ip_priv = length(keys(var.k8s_node_cp.name)) == 1 ? { for i in keys(var.k8s_node_cp.name) : "ip" => module.k8s-node-control-plane["${i}"].internal_ip_address_server[0] } : null
+  k8s_cluster_cp_ip_pub  = length(keys(var.k8s_node_cp.name)) == 1 ? { for i in keys(var.k8s_node_cp.name) : "ip" => module.k8s-node-control-plane[i].external_ip_address_server[0] } : null #{"ip" = lookup(module.internet-alb-project.external_ip_address_alb, "external", "10.0.0.1")[0].0[0]}
+  k8s_cluster_cp_ip_priv = length(keys(var.k8s_node_cp.name)) == 1 ? { for i in keys(var.k8s_node_cp.name) : "ip" => module.k8s-node-control-plane[i].internal_ip_address_server[0] } : null #{"ip" = lookup(module.k8s-nlb-control-plane.internal_ip_address_nlb, "k8s-listener", "10.0.0.1")[0]}
+
+  #k8s_group_vars_all_template = templatefile(
+  #  "${path.module}/templates/group_vars_all_kubespray.tpl",
+  #  {
+  #  nlb_address  = lookup(module.k8s-nlb-control-plane.internal_ip_address_nlb, "k8s-listener", "10.0.0.1")[0]
+  #  }
+  #)
+  
+  #k8s_group_vars_cluster_template = templatefile(
+  #  "${path.module}/templates/group_vars_cluster_kubespray.tpl",
+  #  {
+  #  nlb_address  = lookup(module.k8s-nlb-control-plane.internal_ip_address_nlb, "k8s-listener", "10.0.0.1")[0]
+  #  }
+  #) 
 
   ansible_template = templatefile(
     "${path.module}/templates/ansible_inventory_template.tpl",
@@ -35,24 +49,24 @@ locals {
         local.k8s_cluster_worker_name
       )
       k8s_cluster_node_ip = merge(
-        { for i in keys(var.k8s_node_cp.name) : "${i}" => module.k8s-node-control-plane["${i}"].external_ip_address_server[0] },
-        { for i in keys(var.k8s_node_worker.name) : "${i}" => module.k8s-node-worker["${i}"].external_ip_address_server[0] }
+        { for i in keys(var.k8s_node_cp.name) : i => module.k8s-node-control-plane[i].external_ip_address_server[0] },
+        { for i in keys(var.k8s_node_worker.name) : i => module.k8s-node-worker[i].external_ip_address_server[0] }
       )
       etcd_member_name = merge(
-        { for i in keys(var.k8s_node_cp.etcd_member) : "${i}" => var.k8s_node_cp.etcd_member["${i}"] },
-        { for i in keys(var.k8s_node_worker.etcd_member) : "${i}" => var.k8s_node_worker.etcd_member["${i}"] }
+        { for i in keys(var.k8s_node_cp.etcd_member) : i => var.k8s_node_cp.etcd_member[i] },
+        { for i in keys(var.k8s_node_worker.etcd_member) : i => var.k8s_node_worker.etcd_member[i] }
       )
 
 
-      external_servers_name = { for i in keys(var.k8s_outside_srv.name) : "${i}" => module.k8s-outside-servers["${i}"].hostname_server }
+      external_servers_name = { for i in keys(var.k8s_outside_srv.name) : i => module.k8s-outside-servers[i].hostname_server }
 
-      external_servers_ip = { for i in keys(var.k8s_outside_srv.name) : "${i}" => module.k8s-outside-servers["${i}"].external_ip_address_server[0] }
+      external_servers_ip = { for i in keys(var.k8s_outside_srv.name) : i => module.k8s-outside-servers[i].external_ip_address_server[0] }
 
-      bastion_member_name = length(var.k8s_outside_srv.bastion) > 0 ? { for i in keys(var.k8s_outside_srv.bastion) : "${i}" => var.k8s_outside_srv.bastion["${i}"] } : null
+      bastion_member_name = length(var.k8s_outside_srv.bastion) > 0 ? { for i in keys(var.k8s_outside_srv.bastion) : i => var.k8s_outside_srv.bastion[i] } : null
 
-      monitoring_member_name = length(var.k8s_outside_srv.monitoring) > 0 ? { for i in keys(var.k8s_outside_srv.monitoring) : "${i}" => var.k8s_outside_srv.monitoring["${i}"] } : null
+      monitoring_member_name = length(var.k8s_outside_srv.monitoring) > 0 ? { for i in keys(var.k8s_outside_srv.monitoring) : i => var.k8s_outside_srv.monitoring[i] } : null
 
-      ci_cd_member_name = length(var.k8s_outside_srv.ci-cd) > 0 ? { for i in keys(var.k8s_outside_srv.ci-cd) : "${i}" => var.k8s_outside_srv.ci-cd["${i}"] } : null
+      ci_cd_member_name = length(var.k8s_outside_srv.ci-cd) > 0 ? { for i in keys(var.k8s_outside_srv.ci-cd) : i => var.k8s_outside_srv.ci-cd[i] } : null
     }
   )
 }

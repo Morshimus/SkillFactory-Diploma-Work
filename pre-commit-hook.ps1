@@ -8,11 +8,10 @@ repos:
 - repo: $REPO
   rev: $VERSION # Get the latest from: $REPO/releases
   hooks:
-    - id: black
-      exclude: ^cluster/sf-cluster/flux-system
     - id: terraform_fmt
 #    - id: terraform_validate  -- Not Working in Windows
     - id: terraform_checkov
+      exclude: '^clusters/sf-cluster/flux-system/'
       args:
         - --args=--skip-check CKV_SECRET_13
         - --args=--skip-check CKV_YC_11

@@ -6263,7 +6263,7 @@ spec:
             fieldRef:
               fieldPath: metadata.namespace
         image: ghcr.io/fluxcd/helm-controller:v0.34.1
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         livenessProbe:
           httpGet:
             path: /healthz

@@ -128,7 +128,7 @@ function ansible {
         [Parameter(Mandatory=$False)]
         [String]$server = "lemp",
         [Parameter(Mandatory=$False)]
-        [String]$invFile = "./yandex_cloud.ini",
+        [String]$invFile = "./inventory/sf-cluster/inventory.ini",
         [Parameter(Mandatory=$False)]
         [String]$privateKey = "~/.ssh/SSH_KEY_FINAL",
         [Parameter(Mandatory=$False,Position=0)]
@@ -145,7 +145,7 @@ function ansiblePlaybook {
         [Parameter(Mandatory=$False)]
         [String]$user = "morsh92",        
         [Parameter(Mandatory=$False)]
-        [String]$invFile = "./yandex_cloud.ini",
+        [String]$invFile = "./inventory/sf-cluster/inventory.ini",
         [Parameter(Mandatory=$False)]
         [String]$privateKey = "~/.ssh/SSH_KEY_FINAL",
         [Parameter(Mandatory=$False)]

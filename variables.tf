@@ -130,6 +130,23 @@ variable "subnet_a_description_yandex" {
 }
 
 
+####################################################
+#                    DNS                           #
+#                                                  #
+####################################################
+
+variable "dns_name_pub" {
+  type = string
+  default = "polar-dns"
+  description = "(Required) The DNS name this record set will apply to."
+}
+
+variable "dns_zone_pub" {
+  type = string
+  default = "polar.net.ru."
+  description = "(Required) The DNS name of this zone, e.g. 'example.com.'. Must ends with dot."
+}
+
 
 ####################################################
 #                 Provider                         #

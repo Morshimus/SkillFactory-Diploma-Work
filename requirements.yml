@@ -1,0 +1,4 @@
+---
+- src: https://github.com/Morshimus/SkillFactory-Diploma-Work-CI-Role
+  name: Jenkins
+  scm: git 

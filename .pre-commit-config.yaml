@@ -2,11 +2,10 @@
 - repo: https://github.com/antonbabenko/pre-commit-terraform
   rev: v1.77.0 # Get the latest from: https://github.com/antonbabenko/pre-commit-terraform/releases
   hooks:
-    - id: black
-      exclude: ^cluster/sf-cluster/flux-system
     - id: terraform_fmt
 #    - id: terraform_validate  -- Not Working in Windows
     - id: terraform_checkov
+      exclude: '^[^/]clusters[/]sf-cluster[/]flux-system[/]$'
       args:
         - --args=--skip-check CKV_SECRET_13
         - --args=--skip-check CKV_YC_11
