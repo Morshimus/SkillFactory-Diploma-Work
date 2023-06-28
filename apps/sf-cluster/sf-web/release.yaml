@@ -8,7 +8,7 @@ spec:
   releaseName: angi-helloworld
   chart:
     spec:
-      chart: charts/angi-helloworld
+      chart: ./charts/angi-helloworld
       sourceRef:
         kind: GitRepository
         name: angi-helloworld
