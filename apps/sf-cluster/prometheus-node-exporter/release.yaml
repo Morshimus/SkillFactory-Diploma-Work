@@ -15,3 +15,13 @@ spec:
   install:
     remediation:
       retries: 3
+  values:    
+    service:
+     type: NodePort
+     port: 9100
+     targetPort: 9100
+     nodePort: 30091
+     portName: metrics
+    listenOnAllInterfaces: true
+    annotations:
+     prometheus.io/scrape: "true"
