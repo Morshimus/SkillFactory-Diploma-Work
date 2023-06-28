@@ -10,6 +10,7 @@ spec:
       chart: ./sf-web-app/sf-web-app
       sourceRef:
         kind: GitRepository
+        namespace: skillfactory
         name: sf-web-app
   interval: 5m
   install:
