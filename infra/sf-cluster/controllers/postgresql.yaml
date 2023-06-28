@@ -35,11 +35,11 @@ spec:
   install:
     remediation:
       retries: 3
-  values: 
-    auth:
-      database: sf-web 
-      username: admin
-      password: test123
+#  values: 
+#    auth:
+#      database: sf-web 
+#      username: admin
+#      password: test123
 #    metrics:
 #      enabled: true  
 #    persistence:
