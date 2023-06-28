@@ -20,7 +20,7 @@ spec:
      type: NodePort
      port: 8000
      targetPort: 8000
-     nodePort: 30091
+     nodePort: 30011
      portName: metrics
     listenOnAllInterfaces: true
     db_name: 'django'
