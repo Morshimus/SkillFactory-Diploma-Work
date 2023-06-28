@@ -40,8 +40,8 @@ spec:
       database: sf-web 
       username: admin
       password: test123
-    metrics:
-      enabled: true  
-    persistence:
-      size: 2Gi
+#    metrics:
+#      enabled: true  
+#    persistence:
+#      size: 2Gi
 
