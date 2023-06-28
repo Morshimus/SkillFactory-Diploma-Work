@@ -4,7 +4,7 @@ metadata:
   name: sf-web-app
   namespace: skillfactory
 spec:
-  interval: 5m0s
+  interval: 1m0s
   url: https://github.com/Morshimus/SkillFactory-Diploma-Work-Helm-Charts
   ref:
     branch: main
