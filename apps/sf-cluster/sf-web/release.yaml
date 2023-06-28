@@ -1,16 +1,16 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: prometheus-node-exporter
-  namespace: prometheus
+  name: sf-web-app
+  namespace: skillfactory
 spec:
-  releaseName: prometheus-node-exporter
+  releaseName: sf-web-app
   chart:
     spec:
-      chart: prometheus-node-exporter
+      chart: sf-web-app
       sourceRef:
-        kind: HelmRepository
-        name: prometheus-node-exporter
+        kind: GitRepository
+        name: sf-web-app
   interval: 50m
   install:
     remediation:
@@ -18,10 +18,13 @@ spec:
   values:    
     service:
      type: NodePort
-     port: 9100
-     targetPort: 9100
+     port: 8000
+     targetPort: 8000
      nodePort: 30091
      portName: metrics
     listenOnAllInterfaces: true
-    annotations:
-     prometheus.io/scrape: "true"
+    db_name: 'django'
+    db_username: 'admin'
+    db_password: 'test123'
+    db_host: 'my-release-postgresql.default.svc.cluster.local'
+    db_port: '"5432"'
