@@ -1,0 +1,17 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: prometheus-node-exporter
+  namespace: prometheus
+spec:
+  releaseName: prometheus-node-exporter
+  chart:
+    spec:
+      chart: prometheus-node-exporter
+      sourceRef:
+        kind: HelmRepository
+        name: prometheus-node-exporter
+  interval: 50m
+  install:
+    remediation:
+      retries: 3
