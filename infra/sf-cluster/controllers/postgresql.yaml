@@ -29,7 +29,7 @@ spec:
       chart: postgresql
       version: '12.5.x'
       sourceRef:
-        kind: OCIRepository
+        kind: HelmRepository
         name: postgresql
   interval: 50m
   install:
