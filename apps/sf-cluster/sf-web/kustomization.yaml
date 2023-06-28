@@ -3,5 +3,4 @@ kind: Kustomization
 namespace: angi
 resources:
   - namespace.yaml
-  - repository.yaml
   - release.yaml

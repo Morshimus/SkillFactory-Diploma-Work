@@ -7,11 +7,9 @@ spec:
   interval: 1m
   releaseName: angi-helloworld
   chart:
-    spec:
-      chart: angi-helloworld
-      sourceRef:
-        kind: GitRepository
-        name: angi-helloworld
+    git: https://github.com/dmyerscough/angi-helloworld
+    ref: ec18199bc7e233a9c530f7fc1ca91fc4701a1b72
+    path: sf-web-app/sf-web-app
   values:
     image:
       tag: 0.0.2
