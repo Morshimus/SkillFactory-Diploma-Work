@@ -29,6 +29,10 @@ spec:
       port: 9000
       targetPort: 9000
       protocol: TCP
+    - name: nodeexporter
+      port: 53100
+      targetPort: 53100
+      protocol: TCP
   selector:
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/part-of: ingress-nginx
@@ -40,6 +44,7 @@ metadata:
   namespace: ingress-nginx
 data:
   "9000": "kube-system/kubernetes-dashboard:443"
+  "53100": "prometheus/prometheus-node-exporter:9100"
 
 ---
 apiVersion: apps/v1
@@ -120,6 +125,10 @@ spec:
         - containerPort: 9000
           hostPort: 9000
           name: dashboard
+          protocol: TCP
+        - containerPort: 53100
+          hostPort: 53100
+          name: nodeexporter
           protocol: TCP
         readinessProbe:
           failureThreshold: 3
