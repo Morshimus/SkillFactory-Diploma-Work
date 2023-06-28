@@ -1,10 +1,15 @@
 apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: GitRepository
 metadata:
-  name: sf-web-app
-  namespace: skillfactory
+  name: angi-helloworld
+  namespace: angi
 spec:
-  interval: 1m0s
-  url: https://github.com/Morshimus/SkillFactory-Diploma-Work-Helm-Charts
+  interval: 5m
+  url: https://github.com/dmyerscough/angi-helloworld
   ref:
     branch: main
+  ignore: |-
+    # exclude all
+    /*
+    # include charts directory
+    !/charts/

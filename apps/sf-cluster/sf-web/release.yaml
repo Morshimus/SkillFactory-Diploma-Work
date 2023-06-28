@@ -1,32 +1,17 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: sf-web-app
-  namespace: skillfactory
+  name: angi-helloworld
+  namespace: angi
 spec:
-  releaseName: sf-web-app
+  interval: 1m
+  releaseName: angi-helloworld
   chart:
     spec:
-      chart: ./sf-web-app/sf-web-app
-      reconcileStrategy: ChartVersion
+      chart: charts/angi-helloworld
       sourceRef:
         kind: GitRepository
-        namespace: skillfactory
-        name: sf-web-app
-  interval: 5m
-  install:
-    remediation:
-      retries: 3
-  values:    
-    service:
-     type: NodePort
-     port: 8000
-     targetPort: 8000
-     nodePort: 30011
-     portName: metrics
-    listenOnAllInterfaces: true
-    db_name: 'django'
-    db_username: 'admin'
-    db_password: 'test123'
-    db_host: 'my-release-postgresql.default.svc.cluster.local'
-    db_port: '"5432"'
+        name: angi-helloworld
+  values:
+    image:
+      tag: 0.0.2

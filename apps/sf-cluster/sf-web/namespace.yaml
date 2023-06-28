@@ -1,6 +1,6 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: skillfactory
+  name: angi
   labels:
     toolkit.fluxcd.io/tenant: sre-team
