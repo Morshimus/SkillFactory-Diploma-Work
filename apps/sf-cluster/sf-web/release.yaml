@@ -11,7 +11,7 @@ spec:
       sourceRef:
         kind: GitRepository
         name: sf-web-app
-  interval: 50m
+  interval: 5m
   install:
     remediation:
       retries: 3
