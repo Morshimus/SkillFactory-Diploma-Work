@@ -7,4 +7,4 @@ spec:
   interval: 5m0s
   url: https://github.com/Morshimus/SkillFactory-Diploma-Work-Helm-Charts
   ref:
-    branch: master
+    branch: main
