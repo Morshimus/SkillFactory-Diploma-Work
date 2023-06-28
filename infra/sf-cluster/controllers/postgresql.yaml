@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: ingress-nginx
+  name: postgresql
   labels:
     toolkit.fluxcd.io/tenant: sre-team
 
