@@ -32,7 +32,6 @@ spec:
       sourceRef:
         kind: GitRepository
         name: postgresql
-        path: ./bitnami/postgresql
   interval: 5m
   install:
     remediation:
