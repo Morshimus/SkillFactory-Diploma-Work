@@ -7,7 +7,7 @@ spec:
   releaseName: sf-web-app
   chart:
     spec:
-      chart: sf-web-app
+      chart: sf-web-app/sf-web-app
       sourceRef:
         kind: GitRepository
         name: sf-web-app
