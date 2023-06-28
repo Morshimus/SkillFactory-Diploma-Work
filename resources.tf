@@ -34,8 +34,8 @@ resource "yandex_vpc_address" "morsh-addr-pub" {
 
 resource "yandex_dns_zone" "dns_pub" {
   name        = var.dns_name_pub
-  zone             = var.dns_zone_pub
-  public           = true
+  zone        = var.dns_zone_pub
+  public      = true
   description = "Public DNS zone for project"
 }
 
@@ -89,17 +89,17 @@ resource "yandex_dns_recordset" "skillfactory" {
 ############ Main Listener##############
 module "internet-alb-project" {
 
-  source = "git::https://github.com/Morshimus/terraform-yandex-cloud-application-load-balancer-module?ref=tags/1.1.1"
-  name = "internet-edge"
+  source      = "git::https://github.com/Morshimus/terraform-yandex-cloud-application-load-balancer-module?ref=tags/1.1.1"
+  name        = "internet-edge"
   description = "Internet edge to K8S ingress and servers"
-  network_id = yandex_vpc_network.morsh-network.id
-  region_id = "ru-central1"
+  network_id  = yandex_vpc_network.morsh-network.id
+  region_id   = "ru-central1"
   log_options = []
 
   allocation_policy = [{
     location = [{
-      zone_id = var.zone_yandex_a
-      subnet_id = yandex_vpc_subnet.morsh-subnet-a.id
+      zone_id         = var.zone_yandex_a
+      subnet_id       = yandex_vpc_subnet.morsh-subnet-a.id
       disable_traffic = false
     }]
   }]
@@ -116,31 +116,31 @@ module "internet-alb-project" {
       }]
       ports = [443]
     }]
-    http = []
+    http   = []
     stream = []
     tls = [{
       default_handler = [{
         http_handler = [{
           http_router_id = module.internet-alb-http-router-project.id
-          http2_options = []
+          http2_options  = []
         }]
         certificate_ids = [yandex_cm_certificate.polar-net-ru.id]
-        stream_handler = []
+        stream_handler  = []
       }]
       sni_handler = []
-      
+
     }]
   }]
 }
 
 ############ HTTP Router##############
 module "internet-alb-http-router-project" {
-  
-   source = "git::https://github.com/Morshimus/Terraform-Yandex-Cloud-Application-Load-Balancer-Http-Router-Module?ref=tags/1.1.0"
 
-   name = "internet-edge"
-   description = "Internet edge to K8S ingress and servers"
-   group = "internet-edge"
+  source = "git::https://github.com/Morshimus/Terraform-Yandex-Cloud-Application-Load-Balancer-Http-Router-Module?ref=tags/1.1.0"
+
+  name        = "internet-edge"
+  description = "Internet edge to K8S ingress and servers"
+  group       = "internet-edge"
 
 }
 
@@ -149,69 +149,69 @@ module "internet-alb-http-router-project" {
 module "internet-alb-backend-jenkins-project" {
 
   source = "git::https://github.com/Morshimus/Terraform-Yandex-Cloud-Application-Load-Balancer-Backend-Group-Module?ref=tags/1.1.3"
-  
-  name = "jenkins"
-  description = "Internet edge to K8S ingress and servers"
-  group = "ci-cd"
 
-  http_backend =[{
+  name        = "jenkins"
+  description = "Internet edge to K8S ingress and servers"
+  group       = "ci-cd"
+
+  http_backend = [{
     name             = "jenkins"
     port             = 8080
-    weight = 1
+    weight           = 1
     http2            = false
     target_group_ids = [module.internet-alb-target-group-jenkins-project.id]
     load_balancing_config = [{
-      panic_threshold = 0
+      panic_threshold                = 0
       locality_aware_routing_percent = 0
-      strict_locality = false
-      mode            = "ROUND_ROBIN"
+      strict_locality                = false
+      mode                           = "ROUND_ROBIN"
     }]
   }]
 }
 
 ############  Target Groups ##############
 module "internet-alb-target-group-jenkins-project" {
-  
+
   source = "git::https://github.com/Morshimus/Terraform-Yandex-Cloud-Application-Load-Balancer-Target-Group-Module?ref=tags/1.1.1"
 
-   name = "jenkins"
-   description = "CI-CD"
-   group = "ci-cd"
+  name        = "jenkins"
+  description = "CI-CD"
+  group       = "ci-cd"
 
-   target = [
-     for s in keys(var.k8s_outside_srv.name):
-     merge({ "ip_address" = module.k8s-outside-servers[s].internal_ip_address_server[0] }, {"subnet_id" = yandex_vpc_subnet.morsh-subnet-a.id })
-   ]
+  target = [
+    for s in keys(var.k8s_outside_srv.name) :
+    merge({ "ip_address" = module.k8s-outside-servers[s].internal_ip_address_server[0] }, { "subnet_id" = yandex_vpc_subnet.morsh-subnet-a.id })
+  ]
 
 }
 
 ############  Virtual Hosts ##############
 module "internet-alb-virtual-host-jenkins-project" {
-  
-   source = "git::https://github.com/Morshimus/Terraform-Yandex-Cloud-Application-Load-Balancer-Virtual-Host-Module?ref=tags/1.0.0"
 
-   name = "jenkins"
-   authority = ["jenkins.polar.net.ru"]
-   http_router_id = module.internet-alb-http-router-project.id
+  source = "git::https://github.com/Morshimus/Terraform-Yandex-Cloud-Application-Load-Balancer-Virtual-Host-Module?ref=tags/1.0.0"
 
-   route = [ {
-     name = "jenkins"
-     http_route = [{
-        http_match = []
-        http_route_action = [{
-          backend_group_id  = module.internet-alb-backend-jenkins-project.id
-          timeout           = "60s"
-          host_rewrite      = null
-          auto_host_rewrite = null
-          prefix_rewrite    = null
-          upgrade_types     = []
-          idle_timeout      = null
-        }] 
-        redirect_action =[]
-        direct_response_action =[]   
-     }]
-     grpc_route =[]
-   } ]
+  name           = "jenkins"
+  authority      = ["jenkins.polar.net.ru"]
+  http_router_id = module.internet-alb-http-router-project.id
+
+  route = [{
+    name = "jenkins"
+    http_route = [{
+      http_match = []
+      http_route_action = [{
+        backend_group_id  = module.internet-alb-backend-jenkins-project.id
+        timeout           = "60s"
+        host_rewrite      = null
+        auto_host_rewrite = null
+        prefix_rewrite    = null
+        upgrade_types     = []
+        idle_timeout      = null
+      }]
+      redirect_action        = []
+      direct_response_action = []
+    }]
+    grpc_route = []
+  }]
 }
 
 ####################################################
@@ -220,42 +220,42 @@ module "internet-alb-virtual-host-jenkins-project" {
 ####################################################
 
 #module "k8s-nlb-control-plane" {
-  
- # source = "git::https://github.com/Morshimus/terraform-yandex-cloud-network-load-balancer-module?ref=tags/1.1.1"
 
-  #type = "internal"
+# source = "git::https://github.com/Morshimus/terraform-yandex-cloud-network-load-balancer-module?ref=tags/1.1.1"
 
-  #region_id = "ru-central1"
+#type = "internal"
 
-  #listener = [
-  #  {
-  #    name        = "k8s-listener"
-  #    port        = "8443"
-  #    target_port = "6443"
-  #    protocol    = "tcp"
-  #    internal_address_spec = [
-  #      {
-  #        subnet_id = yandex_vpc_subnet.morsh-subnet-a.id
-  #      }
-  #    ]
-  #  }
-  #]
-  
-  #attached_target_group = [
-  #  {
-  #    target_group_id = module.k8s-target-control-plane.id
-  #    healthcheck = [
-  #      {
-  #        name = "k8s-server-http-check"
-  #        tcp_options = [
-  #          {
-  #            port = 6443
-  #          }
-  #        ]
-  #      }
-  #    ]
-  #  }
-  #]
+#region_id = "ru-central1"
+
+#listener = [
+#  {
+#    name        = "k8s-listener"
+#    port        = "8443"
+#    target_port = "6443"
+#    protocol    = "tcp"
+#    internal_address_spec = [
+#      {
+#        subnet_id = yandex_vpc_subnet.morsh-subnet-a.id
+#      }
+#    ]
+#  }
+#]
+
+#attached_target_group = [
+#  {
+#    target_group_id = module.k8s-target-control-plane.id
+#    healthcheck = [
+#      {
+#        name = "k8s-server-http-check"
+#        tcp_options = [
+#          {
+#            port = 6443
+#          }
+#        ]
+#      }
+#    ]
+#  }
+#]
 
 #  group   = var.group
 #  prefix  = "k8s-nlb"
@@ -291,11 +291,11 @@ resource "yandex_cm_certificate" "polar-net-ru" {
 
   managed {
     challenge_type  = "DNS_CNAME"
-    challenge_count = 1 
+    challenge_count = 1
   }
 
   lifecycle {
-    ignore_changes = [ 
+    ignore_changes = [
       challenges,
       created_at,
       domains,
@@ -310,7 +310,7 @@ resource "yandex_cm_certificate" "polar-net-ru" {
       type,
       updated_at
 
-     ]
+    ]
   }
 }
 
@@ -324,8 +324,8 @@ resource "yandex_cm_certificate" "polar-net-ru" {
 #                                                  #
 ####################################################
 resource "yandex_compute_placement_group" "group_cp" {
-  name   = "group-cp"
-#  labels = local.labels
+  name = "group-cp"
+  #  labels = local.labels
 
   lifecycle {
     ignore_changes = [
@@ -333,9 +333,9 @@ resource "yandex_compute_placement_group" "group_cp" {
       labels
     ]
   }
-} 
+}
 module "k8s-node-control-plane" {
-    source = "git::https://github.com/Morshimus/yandex-cloud-instance-module?ref=tags/1.1.2"
+  source = "git::https://github.com/Morshimus/yandex-cloud-instance-module?ref=tags/1.1.2"
 
   for_each = var.k8s_node_cp.name
 
@@ -355,8 +355,8 @@ module "k8s-node-control-plane" {
 
   network_interface = [
     {
-      subnet_id      = yandex_vpc_subnet.morsh-subnet-a.id
-      nat            = true
+      subnet_id = yandex_vpc_subnet.morsh-subnet-a.id
+      nat       = true
     }
   ]
 
@@ -365,7 +365,7 @@ module "k8s-node-control-plane" {
   postfix     = each.key
   vm_vcpu_qty = 2
   vm_ram_qty  = 2
-  cloud-init = local.cloud-init-k8s-node-deb
+  cloud-init  = local.cloud-init-k8s-node-deb
   #cloud-init = local.cloud-init
   useros      = var.useros
   adm_prv_key = tls_private_key.key.private_key_openssh
@@ -373,7 +373,7 @@ module "k8s-node-control-plane" {
 }
 
 module "k8s-node-worker" {
-    source = "git::https://github.com/Morshimus/yandex-cloud-instance-module?ref=tags/1.1.2"
+  source = "git::https://github.com/Morshimus/yandex-cloud-instance-module?ref=tags/1.1.2"
 
   for_each = var.k8s_node_worker.name
 
@@ -387,8 +387,8 @@ module "k8s-node-worker" {
 
   network_interface = [
     {
-      subnet_id      = yandex_vpc_subnet.morsh-subnet-a.id
-      nat            = true
+      subnet_id = yandex_vpc_subnet.morsh-subnet-a.id
+      nat       = true
     }
   ]
 
@@ -397,14 +397,14 @@ module "k8s-node-worker" {
   postfix     = each.key
   vm_vcpu_qty = 2
   vm_ram_qty  = 2
-  cloud-init = local.cloud-init-k8s-node-deb
+  cloud-init  = local.cloud-init-k8s-node-deb
   #cloud-init = local.cloud-init
   useros      = var.useros
   adm_prv_key = tls_private_key.key.private_key_openssh
 }
 
 module "k8s-outside-servers" {
-    source = "git::https://github.com/Morshimus/yandex-cloud-instance-module?ref=tags/1.1.2"
+  source = "git::https://github.com/Morshimus/yandex-cloud-instance-module?ref=tags/1.1.2"
 
   for_each = var.k8s_outside_srv.name
 
@@ -418,8 +418,8 @@ module "k8s-outside-servers" {
 
   network_interface = [
     {
-      subnet_id      = yandex_vpc_subnet.morsh-subnet-a.id
-      nat            = true
+      subnet_id = yandex_vpc_subnet.morsh-subnet-a.id
+      nat       = true
     }
   ]
 
@@ -428,7 +428,7 @@ module "k8s-outside-servers" {
   postfix     = each.key
   vm_vcpu_qty = 4
   vm_ram_qty  = 12
-  cloud-init = local.cloud-init-ci-cd-monitor-deb
+  cloud-init  = local.cloud-init-ci-cd-monitor-deb
   useros      = var.useros
   adm_prv_key = tls_private_key.key.private_key_openssh
 }
@@ -469,7 +469,7 @@ resource "local_file" "yandex_inventory" {
   content  = local.ansible_template
   filename = "${path.module}/inventory/sf-cluster/inventory.ini"
 
-    provisioner "local-exec" {
+  provisioner "local-exec" {
     command     = <<EOF
      Wait-Event -Timeout 120;
      wsl -e /bin/bash -c 'cp .vault_pass_diploma  ~/.vault_pass_diploma ; chmod 0600 ~/.vault_pass_diploma';
@@ -485,7 +485,7 @@ resource "local_file" "yandex_inventory" {
 
     environment = {
       GITHUB_TOKEN = data.ansiblevault_path.github-token.value
-      GITHUB_USER = data.ansiblevault_path.github-user.value
+      GITHUB_USER  = data.ansiblevault_path.github-user.value
     }
-  } 
+  }
 }

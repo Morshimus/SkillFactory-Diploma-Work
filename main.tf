@@ -14,8 +14,8 @@ terraform {
       version = "~> 4.0"
     }
     ansiblevault = {
-          source  = "MeilleursAgents/ansiblevault"
-          version = "= 2.2.0"
+      source  = "MeilleursAgents/ansiblevault"
+      version = "= 2.2.0"
     }
   }
   backend "s3" {

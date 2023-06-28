@@ -39,7 +39,7 @@ metadata:
   name: tcp-services
   namespace: ingress-nginx
 data:
-  9000: "kube-system/kubernetes-dashboard:443"
+  "9000": "kube-system/kubernetes-dashboard:443"
 
 ---
 apiVersion: apps/v1
