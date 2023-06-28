@@ -36,7 +36,7 @@ spec:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: kubernetes-dashboard
+  name: tcp-services
   namespace: ingress-nginx
 data:
   9000: "kube-system/kubernetes-dashboard:443"
@@ -75,7 +75,7 @@ spec:
       - args:
         - /nginx-ingress-controller
         - --configmap=$(POD_NAMESPACE)/ingress-nginx
-        - --tcp-services-configmap=$(POD_NAMESPACE)/kubernetes-dashboard
+        - --tcp-services-configmap=$(POD_NAMESPACE)/tcp-services
         - --udp-services-configmap=$(POD_NAMESPACE)/udp-services
         - --annotations-prefix=nginx.ingress.kubernetes.io
         - --ingress-class=nginx
