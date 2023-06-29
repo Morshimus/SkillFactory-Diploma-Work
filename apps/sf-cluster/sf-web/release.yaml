@@ -22,4 +22,15 @@ spec:
     db_password: 'test123'
     db_host: 'postgresql.postgresql.svc.cluster.local'
     db_port: '"5432"'
+    ingress:
+      enabled: true
+      className: nginx
+      annotations: 
+        kubernetes.io/ingress.class: nginx
+      hosts:
+        - host: skillfactory.polar.net.ru
+          paths:
+           - path: /
+             pathType: ImplementationSpecific
+        
          
