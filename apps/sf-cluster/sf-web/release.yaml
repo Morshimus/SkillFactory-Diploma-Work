@@ -11,6 +11,6 @@ spec:
       sourceRef:
         kind: GitRepository
         name: angi-helloworld
-  values:
-    image:
-      tag: 0.0.2
+  install:
+    remediation:
+      retries: 3
