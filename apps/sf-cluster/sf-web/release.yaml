@@ -29,5 +29,14 @@ spec:
           paths:
            - path: /
              pathType: ImplementationSpecific
-        
+    autoscaling:
+      enabled: true
+      minReplicas: 2
+      maxReplicas: 4
+      targetCPUUtilizationPercentage: 50
+      targetMemoryUtilizationPercentage: 60
+    resources:
+      limits:
+        memory: 200Mi
+        cpu: 100m
          
