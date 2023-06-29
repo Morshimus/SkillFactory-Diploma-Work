@@ -7,6 +7,22 @@ metadata:
     toolkit.fluxcd.io/tenant: sre-team
 
 ---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: postgresql-pv
+  namespace: postgresql
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/srv"
+---
 apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
@@ -41,6 +57,6 @@ spec:
       password: 'test123'
     metrics:
       enabled: true  
-#    persistence:
-#      size: 2Gi
+    persistence:
+      size: 2Gi
 
