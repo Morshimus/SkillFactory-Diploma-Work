@@ -7,7 +7,7 @@ spec:
   releaseName: podinfo
   chart:
     spec:
-      chart: charts/podinfo
+      chart: podinfo
       sourceRef:
         kind: GitRepository
         name: podinfo
