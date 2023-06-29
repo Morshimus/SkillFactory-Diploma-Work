@@ -4,6 +4,7 @@ $env:KUBECONFIG="$((Get-location).path)/inventory/sf-cluster/artifacts/admin.con
 
 Set-alias k  kubectl 
 Set-alias tf terraform
+Set-alias kubeseal C:\bin\kubeseal\kubeseal.exe
 
 function flux_bootstrap {
 
