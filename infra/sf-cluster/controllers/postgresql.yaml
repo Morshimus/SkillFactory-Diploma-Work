@@ -31,6 +31,19 @@ spec:
   hostPath:
     path: "/srv"
 ---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgresql-pvc
+  namespace: postgresql
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 8Gi
+---
 apiVersion: source.toolkit.fluxcd.io/v1beta2
 kind: HelmRepository
 metadata:
@@ -59,15 +72,14 @@ spec:
     remediation:
       retries: 3
   values: 
-    global:
-       storageClass: ""
     auth:
       database: 'django'
       username: 'admin'
       password: 'test123'
     metrics:
       enabled: true  
-    persistence:
-      storageClass: manual
-      size: 8Gi
+    primary:
+      persistence:
+        existingClaim: postgresql-pvc
+      
 
