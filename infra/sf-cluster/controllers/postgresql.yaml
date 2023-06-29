@@ -41,6 +41,6 @@ spec:
       password: 'test123'
     metrics:
       enabled: true  
-    persistence:
-      size: 2Gi
+#    persistence:
+#      size: 2Gi
 
