@@ -7,16 +7,14 @@ metadata:
     toolkit.fluxcd.io/tenant: sre-team
 
 ---
-apiVersion: source.toolkit.fluxcd.io/v1
-kind: GitRepository
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: HelmRepository
 metadata:
   name: postgresql
   namespace: postgresql
 spec:
-  interval: 5m0s
-  url: https://github.com/bitnami/charts
-  ref:
-    branch: master
+  interval: 1m
+  url: https://morshimus.github.io/SkillFactory-Diploma-Work-Helm-Charts/
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
@@ -30,19 +28,19 @@ spec:
       chart: postgresql
       version: '12.5.x'
       sourceRef:
-        kind: GitRepository
+        kind: HelmRepository
         name: postgresql
   interval: 5m
   install:
     remediation:
       retries: 3
-#  values: 
-#    auth:
-#      database: sf-web 
-#      username: admin
-#      password: test123
-#    metrics:
-#      enabled: true  
-#    persistence:
-#      size: 2Gi
+  values: 
+    auth:
+      database: 'django'
+      username: 'admin'
+      password: 'test123'
+    metrics:
+      enabled: true  
+    persistence:
+      size: 2Gi
 
