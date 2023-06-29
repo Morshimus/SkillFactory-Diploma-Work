@@ -13,7 +13,7 @@ metadata:
   name: sealed-secrets
   namespace: kube-system
 spec:
-  releaseName: postgresql
+  releaseName: sealed-secrets
   chart:
     spec:
       chart: sealed-secrets
