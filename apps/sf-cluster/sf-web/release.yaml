@@ -4,9 +4,7 @@ metadata:
   name: angi-helloworld
   namespace: flux-system
 spec:
-  interval: 1m
-  install:
-    
+  interval: 1m  
   releaseName: angi-helloworld
   chart:
     spec:
