@@ -24,7 +24,6 @@ spec:
     db_port: '"5432"'
     ingress:
       enabled: true
-      className: nginx
       annotations: 
         kubernetes.io/ingress.class: nginx
       hosts:
