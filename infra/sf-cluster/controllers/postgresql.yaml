@@ -7,6 +7,14 @@ metadata:
     toolkit.fluxcd.io/tenant: sre-team
 
 ---
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: manual
+  namespace: postgresql
+provisioner: kubernetes.io/no-provisioner
+volumeBindingMode: WaitForFirstConsumer
+---
 apiVersion: v1
 kind: PersistentVolume
 metadata:
