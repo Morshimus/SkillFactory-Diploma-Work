@@ -43,7 +43,6 @@ metadata:
   name: tcp-services
   namespace: ingress-nginx
 data:
-  "9000": "kube-system/kubernetes-dashboard:443"
   "9187": "postgresql/postgresql-metrics:9187"
 ---
 apiVersion: apps/v1
