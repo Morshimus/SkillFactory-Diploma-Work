@@ -3,4 +3,3 @@ kind: Kustomization
 resources:
     - ingress-nginx.yaml
     - postgresql.yaml
-    - sealed-server.yaml
