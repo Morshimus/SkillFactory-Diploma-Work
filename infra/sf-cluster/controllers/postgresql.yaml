@@ -58,15 +58,16 @@ spec:
   install:
     remediation:
       retries: 3
-#  values: 
-#    global:
-#       storageClass: ""
-#    auth:
-#      database: 'django'
-#      username: 'admin'
-#      password: 'test123'
-#    metrics:
-#      enabled: true  
-#    persistence:
-#      size: 2Gi
+  values: 
+    global:
+       storageClass: ""
+    auth:
+      database: 'django'
+      username: 'admin'
+      password: 'test123'
+    metrics:
+      enabled: true  
+    persistence:
+      storageClass: manual
+      size: 8Gi
 
