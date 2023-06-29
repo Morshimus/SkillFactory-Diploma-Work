@@ -169,6 +169,28 @@ module "internet-alb-backend-jenkins-project" {
   }]
 }
 
+module "internet-alb-backend-skillfactory-project" {
+
+  source = "git::https://github.com/Morshimus/Terraform-Yandex-Cloud-Application-Load-Balancer-Backend-Group-Module?ref=tags/1.1.3"
+
+  name        = "skillfactory"
+  description = "Web site created for Diplom work"
+  group       = "app"
+
+  http_backend = [{
+    name             = "sf-web-app"
+    port             = 80
+    weight           = 1
+    http2            = false
+    target_group_ids = [module.internet-alb-target-group-skillfactory-project.id]
+    load_balancing_config = [{
+      panic_threshold                = 50
+      locality_aware_routing_percent = 20
+      strict_locality                = false
+      mode                           = "ROUND_ROBIN"
+    }]
+  }]
+}
 ############  Target Groups ##############
 module "internet-alb-target-group-jenkins-project" {
 
@@ -184,7 +206,20 @@ module "internet-alb-target-group-jenkins-project" {
   ]
 
 }
+module "internet-alb-target-group-skillfactory-project" {
 
+  source = "git::https://github.com/Morshimus/Terraform-Yandex-Cloud-Application-Load-Balancer-Target-Group-Module?ref=tags/1.1.1"
+
+  name        = "skillfactory"
+  description = "app"
+  group       = "application"
+
+  target = [
+    for s in keys(local.k8s_cluster_node_ip_priv) :
+    merge({ "ip_address" = lookup(local.k8s_cluster_node_ip_priv, s, "10.0.0.1") }, { "subnet_id" = yandex_vpc_subnet.morsh-subnet-a.id })
+  ]
+
+}
 ############  Virtual Hosts ##############
 module "internet-alb-virtual-host-jenkins-project" {
 
@@ -213,7 +248,33 @@ module "internet-alb-virtual-host-jenkins-project" {
     grpc_route = []
   }]
 }
+module "internet-alb-virtual-host-skillfactory-project" {
 
+  source = "git::https://github.com/Morshimus/Terraform-Yandex-Cloud-Application-Load-Balancer-Virtual-Host-Module?ref=tags/1.0.0"
+
+  name           = "skillfactory"
+  authority      = ["skillfactory.polar.net.ru"]
+  http_router_id = module.internet-alb-http-router-project.id
+
+  route = [{
+    name = "sf-web-app"
+    http_route = [{
+      http_match = []
+      http_route_action = [{
+        backend_group_id  = module.internet-alb-backend-skillfactory-project.id
+        timeout           = "60s"
+        host_rewrite      = null
+        auto_host_rewrite = null
+        prefix_rewrite    = null
+        upgrade_types     = []
+        idle_timeout      = null
+      }]
+      redirect_action        = []
+      direct_response_action = []
+    }]
+    grpc_route = []
+  }]
+}
 ####################################################
 #           Network Load-Balancers                 #
 #                                                  #
