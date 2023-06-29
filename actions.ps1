@@ -6,6 +6,11 @@ Set-alias k  kubectl
 Set-alias tf terraform
 Set-alias kubeseal C:\bin\kubeseal\kubeseal.exe
 
+function kubeseal_resource {
+
+  
+    Get-content $secretfile | kubeseal --insecure-skip-tls-verify  --controller-name=sealed-secrets --controller-namespace=kube-system --format yaml > $destination\sealed-secrets.yaml
+}
 function flux_bootstrap {
 
     flux bootstrap github --insecure-skip-tls-verify `

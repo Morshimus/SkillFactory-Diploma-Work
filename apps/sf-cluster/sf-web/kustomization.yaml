@@ -3,5 +3,6 @@ kind: Kustomization
 namespace: sf-web-app
 resources:
   - namespace.yaml
+  - sealed-secrets.yaml
   - repository.yaml
   - release.yaml
