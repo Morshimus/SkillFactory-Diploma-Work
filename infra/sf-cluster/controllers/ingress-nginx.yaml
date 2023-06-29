@@ -29,6 +29,10 @@ spec:
       port: 9000
       targetPort: 9000
       protocol: TCP
+    - name: pgexporter
+      port: 9187
+      targetPort: 9187
+      protocol: TCP
   selector:
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/part-of: ingress-nginx
@@ -40,7 +44,7 @@ metadata:
   namespace: ingress-nginx
 data:
   "9000": "kube-system/kubernetes-dashboard:443"
-
+  "9187": "postgresql/postgresql-metrics:9187"
 ---
 apiVersion: apps/v1
 kind: DaemonSet
@@ -120,6 +124,10 @@ spec:
         - containerPort: 9000
           hostPort: 9000
           name: dashboard
+          protocol: TCP
+        - containerPort: 9187
+          hostPort: 9187
+          name: pgexporter
           protocol: TCP
         readinessProbe:
           failureThreshold: 3
