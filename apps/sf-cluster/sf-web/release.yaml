@@ -12,7 +12,7 @@ spec:
         kind: GitRepository
         name: podinfo
         namespace: podinfo
-  interval: 50m
+  interval: 1m
   install:
     remediation:
       retries: 3
