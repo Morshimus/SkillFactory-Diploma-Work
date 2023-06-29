@@ -1,28 +1,18 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: podinfo
-  namespace: podinfo
+  name: sf-web-app
+  namespace: sf-web-app
 spec:
-  releaseName: podinfo
+  releaseName: sf-web-app
   chart:
     spec:
-      chart: podinfo
+      chart: sf-web-app
       sourceRef:
-        kind: GitRepository
-        name: podinfo
-        namespace: podinfo
+        kind: HelmRepository
+        name: sf-web-app
+        namespace: sf-web-app
   interval: 1m
   install:
     remediation:
       retries: 3
-  # Default values
-  # https://github.com/stefanprodan/podinfo/blob/master/charts/podinfo/values.yaml
-  values:
-    redis:
-      enabled: true
-      repository: public.ecr.aws/docker/library/redis
-      tag: 7.0.6
-    ingress:
-      enabled: true
-      className: nginx

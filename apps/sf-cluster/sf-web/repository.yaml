@@ -1,14 +1,8 @@
-apiVersion: source.toolkit.fluxcd.io/v1
-kind: GitRepository
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: HelmRepository
 metadata:
-  name: podinfo
+  name: sf-web-app
+  namespace: sf-web-app
 spec:
   interval: 1m
-  url: https://github.com/stefanprodan/podinfo
-  ref:
-    branch: master
-  ignore: |
-    # exclude all
-    /*
-    # include charts directory
-    !/charts/    
+  url: https://morshimus.github.io/SkillFactory-Diploma-Work-Helm-Charts/
