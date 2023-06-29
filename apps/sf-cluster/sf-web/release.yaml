@@ -18,8 +18,6 @@ spec:
       retries: 3
   values:
     db_name: 'django'
-    db_username: 'admin'
-    db_password: 'test123'
     db_host: 'postgresql.postgresql.svc.cluster.local'
     db_port: '"5432"'
     ingress:
