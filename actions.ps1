@@ -24,8 +24,8 @@ function kubeseal_resource {
 }
 
 function kubeseal_refresh {
-    kubeseal_resource -secretfile .\raw_secrets_infra.yaml  -destination "$((Get-Location).Path)\infra\sf-cluster\configs";
-    kubeseal_resource -secretfile .\raw_secrets_sf_web_app.yaml  -destination "$((Get-Location).Path)\apps\sf-cluster\sf-web";
+    kubeseal_resource -secretfile .\raw_secrets_infra.yaml  -destination "$((Get-Location).Path)\infra\sf-cluster\configs" | Out-Null;
+    kubeseal_resource -secretfile .\raw_secrets_sf_web_app.yaml  -destination "$((Get-Location).Path)\apps\sf-cluster\sf-web"| Out-Null;
 }
 
 function flux_bootstrap {
