@@ -4,5 +4,4 @@ resources:
     - ingress-nginx.yaml
     - sealed-server.yaml
     - metric-server.yaml
-    - postgresql.yaml
     
