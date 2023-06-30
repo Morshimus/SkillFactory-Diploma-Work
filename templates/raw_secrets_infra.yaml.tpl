@@ -1,6 +1,8 @@
 apiVersion: v1
 kind: Secret
 metadata:
+  annotations:
+     sealedsecrets.bitnami.com/managed: "true"
   labels:
     app.kubernetes.io/instance: postgresql
     app.kubernetes.io/managed-by: Helm
