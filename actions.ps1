@@ -7,9 +7,20 @@ Set-alias tf terraform
 Set-alias kubeseal C:\bin\kubeseal\kubeseal.exe
 
 function kubeseal_resource {
-
+    Param ( 
+     [Parameter(Mandatory=$true, Position=0)]
+     [string]$secretfile,
+     [Parameter(Mandatory=$false, Position=0)]
+     [string]$destination
+     )
   
-    Get-content $secretfile | kubeseal --insecure-skip-tls-verify  --controller-name=sealed-secrets --controller-namespace=kube-system --format yaml > $destination\sealed-secrets.yaml
+    Get-content $secretfile | kubeseal --insecure-skip-tls-verify  --controller-name=sealed-secrets --controller-namespace=kube-system --format yaml > $destination\sealed-secrets.yaml; if($?){
+
+    git add .;
+    git commit -am "Updated sealed secrets at  $destination" ;
+    git push
+
+    }
 }
 function flux_bootstrap {
 
