@@ -71,7 +71,9 @@ spec:
   install:
     remediation:
       retries: 3
-  values: 
+  values:
+    sealedsecret:
+      enabled: true 
     auth:
       database: 'django'
       username: 'admin'
