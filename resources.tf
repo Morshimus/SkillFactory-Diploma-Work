@@ -550,8 +550,7 @@ resource "local_file" "yandex_inventory" {
      $ConnectionConf=$ConnectionConf  -replace "${lookup(local.k8s_cluster_cp_ip_priv, "ip", 0)}", "${lookup(local.k8s_cluster_cp_ip_pub, "ip", 0)}"; 
      $ConnectionConf | Set-Content -Encoding UTF8 $env:KUBECONFIG; 
      flux_bootstrap; Wait-event -Timeout 300;
-     kubeseal_resource -secretfile .\raw_secrets_infra.yaml  -destination "${path.module}\infra\sf-cluster\configs";
-     kubeseal_resource -secretfile .\raw_secrets_sf_web_app.yaml  -destination "${path.module}\apps\sf-cluster\sf-web";
+     kubeseal_refresh
     EOF
     interpreter = ["powershell.exe", "-NoProfile", "-c"]
 
