@@ -22,3 +22,18 @@ data "ansiblevault_path" "jenkins_archive_password" {
   path = "${path.module}/secrets.yml"
   key  = "jenkins_archive_password"
 }
+
+data "ansiblevault_path" "db_username" {
+  path = "${path.module}/secrets.yml"
+  key  = "db_username"
+}
+
+data "ansiblevault_path" "db_password" {
+  path = "${path.module}/secrets.yml"
+  key  = "db_password"
+}
+
+data "ansiblevault_path" "db_postgres_password" {
+  path = "${path.module}/secrets.yml"
+  key  = "db_postgres_password"
+}

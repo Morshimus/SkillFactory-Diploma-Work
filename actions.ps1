@@ -22,6 +22,12 @@ function kubeseal_resource {
 
     }
 }
+
+function kubeseal_refresh {
+    kubeseal_resource -secretfile .\raw_secrets_infra.yaml  -destination "$((Get-Location).Path)\infra\sf-cluster\configs";
+    kubeseal_resource -secretfile .\raw_secrets_sf_web_app.yaml  -destination "$((Get-Location).Path)\apps\sf-cluster\sf-web";
+}
+
 function flux_bootstrap {
 
     flux bootstrap github --insecure-skip-tls-verify `

@@ -52,31 +52,6 @@ metadata:
 spec:
   interval: 1m
   url: https://morshimus.github.io/SkillFactory-Diploma-Work-Helm-Charts/
-
----
-apiVersion: bitnami.com/v1alpha1
-kind: SealedSecret
-metadata:
-  creationTimestamp: null
-  name: postgresql
-  namespace: postgresql
-spec:
-  encryptedData:
-    password: AgBKfa2n26Ys2ZAhHKIg0r302pbfOoBHxXUWeit0ZKI59lHYzf+ZNoIi1Xn7vENcQrilOI6/UUnn/IVGJrKgwP4V0BZiXW2Fd0E4/2t5O7pQkx1FZO/umvuP++HcCPllCE+LL3Qh5b9+0qkuYSAZTHEbUZAGvavYEMAfE6qpBa2JS9Qh1LR8ZZUtK2Sv4LP6v1e8osTYgQ596yGGNJTrszXW/o7JBvmd2pY0WBd6qJ5jCmIAZJWlwHEh/cVwz30101o1Y2LoluZ6h8SXSx7zgric4VEYw63ZbTp3SZT4qTp+iV2CIB0kqDodmAQMxozztH+BahXnk7xKkKY2jH5jPtrz+spuo5T2qs/cbOobmtl9Y10dtrvZK3AClTyavi8fpbaN69J0LPcxevAJlfLT+43Nty96OZ8OgGlzlelBiviA8n0eTo221IV8oBVehEGdoj835+6ZMnWC9jrXAJw+niSHVlWcLUowUmB4XhZhfatcOzAwD8EdGe0sSf7LVtwZhtVF1vQm3YsgB3VeHAHszE4CRfDzGrRxUOj0iUZaxjxaO4xNR4S1rRooMunMk3TRdoC72GD8qBk823JaObQUtnXFCT0rNsfqD8PGiBQci6J8X+A4MRLgewDjx+RSOg87Rc/U8r89sHJjs7XMJeNaHh3EKoeJR7PRPmyq2sNeYvJ2x2tvdokfpfWpM+sXjeWTyJkcz3tWrhJE
-    postgres-password: AgAK3pstcBBwMFj5EAoqK6IJB3fJbfW8SgFS9khc2cwsYvjjfZ9zQsu3Oxjt6rT/SCacA6brxIOg+Tetvrv4JxZvPZFj4m4Sbi31qMTQQH/4wTqpeAh+2RLh1/s2X2mLwxAUg3tQXLxpvphVo0MsDM0gP/SoAe4krN1uf2LA9C/iRrpoBeWTIZP33ExlYHSPA4NdrN7zGCFK8SXgRCJ/3xkeFCJKbRRMFm+5OWmY3Vhm8/SDNIWx2UdHGuQPZScDIfMf8ni8ct0o2Br/hX0GTNmaT+itPFYrUXp4uKnIZqQf+bGVNjWzvJ3QMXwG/XHgPa0bTLmI0kOVTdKgvR+aQLM4m5PMcu264zGGD0maA3rcpEU8j9QabFhDfmvlb/LebsbXxFnbbpk6qW6NDDUDQsMzUPanKUnHL0hWFrdo8LEv3ynxjHMTA8gWpYj0yjeN0f+46QP5RisC3fELWCnvc5FnjPOTQUcV2EKO04RpdMtpyNffai/nxor2Y9wtHp8Af2zc17sZdyI3xRCElUzjxXA+hqxzx0XKDAk8GmPqj1qv7FlqmuR9vnXZWatnM6Tt9fSxiwpCtRKUtG+XKx82U9hMHXUWvEBK4LXq4Yw8oxetST5XCF9Ur744kFrJ+XP9fOo6WaLTk2w5IVDdyEU4VSRmwVDC4XTtw/I57XWn5G1Wnia2V+LNv+9ssU6Nzhix7HIM+VZOXqjx+RmY
-  template:
-    metadata:
-      creationTimestamp: null
-      labels:
-        app.kubernetes.io/instance: postgresql
-        app.kubernetes.io/managed-by: Helm
-        app.kubernetes.io/name: postgresql
-        helm.sh/chart: postgresql-12.5.9
-        helm.toolkit.fluxcd.io/name: postgresql
-        helm.toolkit.fluxcd.io/namespace: postgresql
-      name: postgresql
-      namespace: postgresql
-    type: Opaque
 ---
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease

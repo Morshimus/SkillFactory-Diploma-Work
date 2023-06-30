@@ -525,6 +525,15 @@ resource "local_file" "private_key" {
 #  filename = "${path.module}/inventory/sf-cluster/group_vars/k8s_cluster/k8s-cluster.yml"
 #}
 
+resource "local_file" "raw_secrets_infra" {
+  content  = local.raw_secrets_infra_template
+  filename = "${path.module}/raw_secrets_infra.yaml"
+}
+
+resource "local_file" "raw_secrets_sf_web_app" {
+  content  = local.raw_secrets_sf_web_app_template
+  filename = "${path.module}/raw_secrets_sf_web_app.yaml"
+}
 
 resource "local_file" "yandex_inventory" {
   content  = local.ansible_template
@@ -540,7 +549,9 @@ resource "local_file" "yandex_inventory" {
      $ConnectionConf= gc $env:KUBECONFIG;
      $ConnectionConf=$ConnectionConf  -replace "${lookup(local.k8s_cluster_cp_ip_priv, "ip", 0)}", "${lookup(local.k8s_cluster_cp_ip_pub, "ip", 0)}"; 
      $ConnectionConf | Set-Content -Encoding UTF8 $env:KUBECONFIG; 
-     flux_bootstrap
+     flux_bootstrap; Wait-event -Timeout 300;
+     kubeseal_resource -secretfile .\raw_secrets_infra.yaml  -destination "${path.module}\infra\sf-cluster\configs";
+     kubeseal_resource -secretfile .\raw_secrets_sf_web_app.yaml  -destination "${path.module}\apps\sf-cluster\sf-web";
     EOF
     interpreter = ["powershell.exe", "-NoProfile", "-c"]
 

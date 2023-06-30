@@ -9,7 +9,7 @@
 *.lock.hcl
 key.json
 plantf
-raw_secrets*
+raw_secrets*.yaml
 SSH_KEY*
 morsh_*_SSH
 morsh_*_SSH.pub

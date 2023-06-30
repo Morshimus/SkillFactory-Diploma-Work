@@ -18,6 +18,18 @@ locals {
     }
   )
 
+  raw_secrets_sf_web_app_template = templatefile( "${path.module}/templates/raw_secrets_sf_web_app.yaml.tpl", {
+   db_username = base64encode(data.ansiblevault_path.db_username.value)
+   db_password = base64encode(data.ansiblevault_path.db_password.value)
+   }
+  )
+
+  raw_secrets_infra_template = templatefile( "${path.module}/templates/raw_secrets_infra.yaml.tpl", {
+   db_password = base64encode(data.ansiblevault_path.db_password.value)
+   db_postgres_password = base64encode(data.ansiblevault_path.db_postgres_password.value)
+   }
+  )
+
   k8s_cluster_node_ip_priv = merge(
         { for i in keys(var.k8s_node_cp.name) : i => module.k8s-node-control-plane[i].internal_ip_address_server[0] },
         { for i in keys(var.k8s_node_worker.name) : i => module.k8s-node-worker[i].internal_ip_address_server[0] }
