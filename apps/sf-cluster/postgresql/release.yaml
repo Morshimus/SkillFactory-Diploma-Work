@@ -1,27 +1,29 @@
 apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
-  name: prometheus-node-exporter
-  namespace: prometheus
+  name: postgresql
+  namespace: postgresql
 spec:
-  releaseName: prometheus-node-exporter
+  releaseName: postgresql
   chart:
     spec:
-      chart: prometheus-node-exporter
+      chart: postgresql
+      version: '12.5.x'
       sourceRef:
         kind: HelmRepository
-        name: prometheus-node-exporter
-  interval: 50m
+        name: postgresql
+  interval: 1m
   install:
     remediation:
       retries: 3
-  values:    
-    service:
-     type: NodePort
-     port: 9100
-     targetPort: 9100
-     nodePort: 30091
-     portName: metrics
-    listenOnAllInterfaces: true
-    annotations:
-     prometheus.io/scrape: "true"
+  values:
+    sealedsecret:
+      enabled: true 
+    auth:
+      database: 'django'
+      username: 'admin'
+    metrics:
+      enabled: true  
+    primary:
+      persistence:
+        existingClaim: postgresql-pvc
