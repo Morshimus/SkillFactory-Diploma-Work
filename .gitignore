@@ -18,6 +18,7 @@ adm-user_SSH.pub
 yandex_cloud.ini
 **/molecule/*
 **/roles/*
+**/vars/*
 .tmp
 inventory.ini
 .vault_pass_*

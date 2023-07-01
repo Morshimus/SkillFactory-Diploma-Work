@@ -5,6 +5,9 @@
   roles:
     - role: Jenkins
       
-       
-      
+- hosts: monitoring
+  gather_facts: yes
+  become: yes
+  roles:
+     - role: Prometheus    
        

@@ -169,6 +169,29 @@ module "internet-alb-backend-jenkins-project" {
   }]
 }
 
+module "internet-alb-backend-grafana-project" {
+
+  source = "git::https://github.com/Morshimus/Terraform-Yandex-Cloud-Application-Load-Balancer-Backend-Group-Module?ref=tags/1.1.3"
+
+  name        = "grafana"
+  description = "Internet edge to K8S ingress and servers"
+  group       = "monitoring"
+
+  http_backend = [{
+    name             = "grafana"
+    port             = 3000
+    weight           = 1
+    http2            = false
+    target_group_ids = [module.internet-alb-target-group-grafana-project.id]
+    load_balancing_config = [{
+      panic_threshold                = 0
+      locality_aware_routing_percent = 0
+      strict_locality                = false
+      mode                           = "ROUND_ROBIN"
+    }]
+  }]
+}
+
 module "internet-alb-backend-skillfactory-project" {
 
   source = "git::https://github.com/Morshimus/Terraform-Yandex-Cloud-Application-Load-Balancer-Backend-Group-Module?ref=tags/1.1.3"
@@ -203,6 +226,23 @@ module "internet-alb-target-group-jenkins-project" {
   target = [
     for s in keys(var.k8s_outside_srv.name) :
     merge({ "ip_address" = module.k8s-outside-servers[s].internal_ip_address_server[0] }, { "subnet_id" = yandex_vpc_subnet.morsh-subnet-a.id })
+    if var.k8s_outside_srv.ci-cd[s] == true
+  ]
+
+}
+
+module "internet-alb-target-group-grafana-project" {
+
+  source = "git::https://github.com/Morshimus/Terraform-Yandex-Cloud-Application-Load-Balancer-Target-Group-Module?ref=tags/1.1.1"
+
+  name        = "grafana"
+  description = "monitoring"
+  group       = "monitoring"
+
+  target = [
+    for s in keys(var.k8s_outside_srv.name) :
+    merge({ "ip_address" = module.k8s-outside-servers[s].internal_ip_address_server[0] }, { "subnet_id" = yandex_vpc_subnet.morsh-subnet-a.id })
+    if var.k8s_outside_srv.monitoring[s] == true
   ]
 
 }
@@ -235,6 +275,34 @@ module "internet-alb-virtual-host-jenkins-project" {
       http_match = []
       http_route_action = [{
         backend_group_id  = module.internet-alb-backend-jenkins-project.id
+        timeout           = "60s"
+        host_rewrite      = null
+        auto_host_rewrite = null
+        prefix_rewrite    = null
+        upgrade_types     = []
+        idle_timeout      = null
+      }]
+      redirect_action        = []
+      direct_response_action = []
+    }]
+    grpc_route = []
+  }]
+}
+
+module "internet-alb-virtual-host-grafana-project" {
+
+  source = "git::https://github.com/Morshimus/Terraform-Yandex-Cloud-Application-Load-Balancer-Virtual-Host-Module?ref=tags/1.0.0"
+
+  name           = "grafana"
+  authority      = ["grafana.polar.net.ru"]
+  http_router_id = module.internet-alb-http-router-project.id
+
+  route = [{
+    name = "grafana"
+    http_route = [{
+      http_match = []
+      http_route_action = [{
+        backend_group_id  = module.internet-alb-backend-grafana-project.id
         timeout           = "60s"
         host_rewrite      = null
         auto_host_rewrite = null
@@ -559,6 +627,10 @@ resource "local_file" "raw_secrets_sf_web_app" {
   }
 }
 
+resource "local_file" "monitoring_yaml" {
+  content = local.monitoring_yaml_tpl_template
+  filename = "${path.module}/vars/monitoring.yaml"
+}
 resource "local_file" "yandex_inventory" {
   content  = local.ansible_template
   filename = "${path.module}/inventory/sf-cluster/inventory.ini"

@@ -13,8 +13,8 @@ variable "k8s_node_cp" {
       Key - is postfix
       Value - is prefix
     For etcd_member:
-      Key - is name
-      Value - is type
+      Key - is postfix
+      Value - is bool
     EOT
   default = {
     name = {
@@ -37,8 +37,8 @@ variable "k8s_node_worker" {
       Key - is postfix
       Value - is prefix
     For etcd_member:
-      Key - is name
-      Value - is type
+      Key - is postfix
+      Value - is bool
     EOT
   default = {
     name = {
@@ -64,14 +64,14 @@ variable "k8s_outside_srv" {
       Key - is postfix
       Value - is prefix
     For ci-cd:
-      Key - is name
-      Value - is type
+      Key - is postfix
+      Value - is bool
     For monitoring:
-      Key - is name
-      Value - is type
+      Key - is postfix
+      Value - is bool
     For bastion:
-      Key - is name
-      Value - is type     
+      Key - is postfix
+      Value - is bool     
     EOT
   default = {
     name = {

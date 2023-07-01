@@ -29,7 +29,6 @@ locals {
    db_postgres_password = base64encode(data.ansiblevault_path.db_postgres_password.value)
    }
   )
-
   k8s_cluster_node_ip_priv = merge(
         { for i in keys(var.k8s_node_cp.name) : i => module.k8s-node-control-plane[i].internal_ip_address_server[0] },
         { for i in keys(var.k8s_node_worker.name) : i => module.k8s-node-worker[i].internal_ip_address_server[0] }
@@ -41,6 +40,17 @@ locals {
   k8s_cluster_cp_ip_pub  = length(keys(var.k8s_node_cp.name)) == 1 ? { for i in keys(var.k8s_node_cp.name) : "ip" => module.k8s-node-control-plane[i].external_ip_address_server[0] } : null
   k8s_cluster_cp_ip_priv = length(keys(var.k8s_node_cp.name)) == 1 ? { for i in keys(var.k8s_node_cp.name) : "ip" => module.k8s-node-control-plane[i].internal_ip_address_server[0] } : null
 
+  monitoring_yaml_tpl_template = templatefile( "${path.module}/templates/monitoring.yaml.tpl", {
+      
+      k8s_cluster_cp_name     = local.k8s_cluster_cp_name
+      k8s_cluster_node_name = merge(
+        local.k8s_cluster_cp_name,
+        local.k8s_cluster_worker_name
+      )
+
+   } 
+  )
+
   ansible_template = templatefile(
     "${path.module}/templates/ansible_inventory_template.tpl",
     {
@@ -51,6 +61,7 @@ locals {
         local.k8s_cluster_cp_name,
         local.k8s_cluster_worker_name
       )
+
       k8s_cluster_node_ip = merge(
         { for i in keys(var.k8s_node_cp.name) : i => module.k8s-node-control-plane[i].external_ip_address_server[0] },
         { for i in keys(var.k8s_node_worker.name) : i => module.k8s-node-worker[i].external_ip_address_server[0] }

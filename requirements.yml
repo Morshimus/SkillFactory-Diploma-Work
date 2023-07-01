@@ -2,3 +2,7 @@
 - src: https://github.com/Morshimus/SkillFactory-Diploma-Work-CI-Role
   name: Jenkins
   scm: git 
+
+- src: https://github.com/Morshimus/SkillFactory-Diploma-Work-Loki-Prom-Grafana-Role
+  name: Prometheus
+  scm: git 
