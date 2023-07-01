@@ -25,9 +25,9 @@ spec:
       port: 443
       targetPort: 443
       protocol: TCP
-    - name: kubernetes-dashboard
-      port: 9000
-      targetPort: 9000
+    - name: cadvisor
+      port: 9080
+      targetPort: 9080
       protocol: TCP
     - name: pgexporter
       port: 9187
@@ -43,7 +43,8 @@ metadata:
   name: tcp-services
   namespace: ingress-nginx
 data:
-  "9187": "postgresql/postgresql-metrics:9187"
+  "9187": postgresql/postgresql-metrics:9187
+  "9080": cadvisor/cadvisor:8080
 ---
 apiVersion: apps/v1
 kind: DaemonSet
@@ -120,9 +121,9 @@ spec:
           hostPort: 10254
           name: metrics
           protocol: TCP
-        - containerPort: 9000
-          hostPort: 9000
-          name: dashboard
+        - containerPort: 9080
+          hostPort: 9080
+          name: cadvisor
           protocol: TCP
         - containerPort: 9187
           hostPort: 9187

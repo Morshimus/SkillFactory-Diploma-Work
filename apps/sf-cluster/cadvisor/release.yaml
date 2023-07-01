@@ -1,0 +1,17 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: cadvisor
+  namespace: cadvisor
+spec:
+  releaseName: cadvisor
+  chart:
+    spec:
+      chart: cadvisor
+      sourceRef:
+        kind: HelmRepository
+        name: cadvisor
+  interval: 50m
+  install:
+    remediation:
+      retries: 3
