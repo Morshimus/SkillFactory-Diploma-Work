@@ -19,10 +19,9 @@ spec:
 %{ if monitoring_member_name != null}
   values:
     config:
-       serverPort: 3100
        clients:
 %{ for index, server in external_servers_name ~}
-%{ if lookup(monitoring_member_name ,  index , false) != false }            - url: http://${server}/loki/api/v1/push          
+%{ if lookup(monitoring_member_name ,  index , false) != false }            - url: http://${server}:3100/loki/api/v1/push          
 %{ else }
 %{ endif }
 %{ endfor ~}
