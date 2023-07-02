@@ -350,6 +350,7 @@ resource "yandex_cm_certificate" "polar-net-ru" {
 
 
 > В целях безопасности, была применена Security Group к машинам за натом - разрешен только адрес запускающего apply data.http.myip , на ALB не распространяется. В идеале - все делаем через bastion, прописываем туннели для kube api - оставляем адрес только для ALB.
+![image](https://ams03pap004files.storage.live.com/y4mo9-9adVBZ4o3k7q2qlpVl4AyWk0S_hTh0ZUUUbDi8DNGZMX4AaZpTXuHuMzuV5myk-u0SmVIGHcR3XckVmt1GBTNdBmKiqYhhsnSeqUSStxjhFCppdzffZAnfOBikQBM5NnzIr9b1u0Mc6zNijViVMQyKxaPGz3vNdlaFNvDfeyLEwP2aSc6wv_HDURxGK8a?encodeFailures=1&width=1756&height=802)
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
