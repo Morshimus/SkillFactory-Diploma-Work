@@ -568,11 +568,110 @@ power_state:
 
 > Теперь черед kubesrpay. Самый главный аттрибут который нам пригодится - override_system_hostname: false   - так как мы уже назначили имена нашим нодам. Выполнятся в моем случае из docker контейнера - время от 30 до 40 минут.
 
+```ini
 
-> И мы подходим к самому вкусному. Flux -  запускаем его и ждем инициализации.
+[all]
+k8s-cp-polar-001.polar.grp  ansible_host=51.250.6.184 ansible_user=morsh-adm ansible_become=yes etcd_member_name=etcd001
+k8s-worker-polar-002.polar.grp  ansible_host=158.160.106.116 ansible_user=morsh-adm ansible_become=yes 
 
-> Завершаем наш парад kubeseal - ждем пока создаться service sealed-secrets , иначе выполнение не будет успешным.
 
+
+
+[kube-master]
+k8s-cp-polar-001.polar.grp
+
+
+[etcd]
+k8s-cp-polar-001.polar.grp
+
+
+
+
+[kube-node]
+k8s-worker-polar-002.polar.grp
+
+
+[calico-rr]
+
+[k8s-cluster:children]
+kube-master
+kube-node
+calico-rr
+
+
+[monitoring]
+srv-ext-polar-003.polar.grp ansible_host=158.160.105.38 ansible_user=morsh-adm ansible_become=yes
+
+
+
+
+[Jenkins-CI]
+srv-ext-polar-003.polar.grp ansible_host=158.160.105.38 ansible_user=morsh-adm ansible_become=yes
+
+[Jenkins-CI:vars]
+Jenkins_Docker_root=/opt/morsh_ci
+
+
+```
+
+> И мы подходим к самому вкусному. Flux -  запускаем его и ждем инициализации.И далее Завершаем наш парад kubeseal - ждем пока создаться service sealed-secrets , иначе выполнение не будет успешным. Прилагаю скрипт всего действа, многое описано в actions.ps1 файлею
+
+```hcl
+resource "local_file" "yandex_inventory" {
+  content  = local.ansible_template
+  filename = "${path.module}/inventory/sf-cluster/inventory.ini"
+
+  provisioner "local-exec" {
+    command     = <<EOF
+     Wait-Event -Timeout 120;
+     wsl -e /bin/bash -c 'cp .vault_pass_diploma  ~/.vault_pass_diploma ; chmod 0600 ~/.vault_pass_diploma'; ## Настраиваем секреты ansible-vault
+     wsl -e /bin/bash -c 'cp SSH_KEY_FINAL  ~/.ssh/SSH_KEY_FINAL ; chmod 0600 ~/.ssh/SSH_KEY_FINAL'; ## Настраиваем ssh приватный ключ - который тоже динамический.
+     . ./actions.ps1; ## Запускаем наш wrapper который  - переменные среды указаны ниже и взяты из загифрованного secrets.yml.
+     UpdateAnsibleRoles; ## обновляем роли через ansible-galaxy из наших репозиториев, которые указаны  в самом начале этого проекта.
+     ansible-playbook -secret;  ## Устанавлиаем роли с помощью динаического плейбука provisioning.yaml
+     kubespray; ## Запускаем kubespray - монтируем директорию inventory\sf-cluster
+     $ConnectionConf= gc $env:KUBECONFIG; 
+     $ConnectionConf=$ConnectionConf  -replace "${lookup(local.k8s_cluster_cp_ip_priv, "ip", 0)}", "${lookup(local.k8s_cluster_cp_ip_pub, "ip", 0)}";
+     $ConnectionConf | Set-Content -Encoding UTF8 $env:KUBECONFIG;  ## Производим модификацию адреса подключения kube api на внешний адрес.
+     flux_bootstrap; ## Инициализируем flux в clusters\sf-cluster\flux-system. После выполнения сразу же начинается kustomization инфраструктуры кубера - далее приложения.
+     do{k --insecure-skip-tls-verify  get svc  sealed-secrets -n kube-system }while( $? -like $false); ## Ждем поднятия сервиса sealed-secrets, чтобы сгенерировать зашифрованные секреты.
+     kubeseal_refresh ## После успешной генерации секретов, делается коммит, и push - Все, они уже во Flux, под надзором Kusтомизатора.
+    EOF
+    interpreter = ["powershell.exe", "-NoProfile", "-c"]
+
+    environment = {
+      GITHUB_TOKEN = data.ansiblevault_path.github-token.value
+      GITHUB_USER  = data.ansiblevault_path.github-user.value
+    }
+  }
+}
+```
+
+> Ниже приведу функции kubeseal из actions.ps1, и также создание сырых(не зашифрованных) секретов из темплейтов (которые в gitignore).  Kubeseal применяется при изменении паролей в не зашифрованных секретах (также если сервис существует, если нет, ожидает общего конфига) - но лучше этого не делать на рабочем кластере, либо делать по-умному - мы плавно переходим к helm ci cd части.
+
+```ps1
+function kubeseal_resource {
+    Param ( 
+     [Parameter(Mandatory=$true, Position=0)]
+     [string]$secretfile,
+     [Parameter(Mandatory=$false, Position=0)]
+     [string]$destination
+     )
+  
+    Get-content $secretfile | kubeseal --insecure-skip-tls-verify  --controller-name=sealed-secrets --controller-namespace=kube-system --format yaml > $destination\sealed-secrets.yaml; if($?){
+
+    git add .;
+    git commit -am "Updated sealed secrets at  $destination" ;
+    git push
+
+    }
+}
+
+function kubeseal_refresh {
+    kubeseal_resource -secretfile .\raw_secrets_infra.yaml  -destination "$((Get-Location).Path)\infra\sf-cluster\configs" | Out-Null;
+    kubeseal_resource -secretfile .\raw_secrets_sf_web_app.yaml  -destination "$((Get-Location).Path)\apps\sf-cluster\sf-web"| Out-Null;
+}
+```
 
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
