@@ -10,6 +10,60 @@
 
 ## [Skillfactory Diploma Work Helm Charts](https://github.com/Morshimus/SkillFactory-Diploma-Work-Helm-Charts) - Helm шаблон для приложения, плюс модифицированный шаблоны promtail и  postgresql. Работает как helm репозиторий
 
+```mermaid
+graph TD
+
+subgraph VPC
+    network["yandex_vpc_network<br/>(morsh-network)"]
+    subnet["yandex_vpc_subnet<br/>(morsh-subnet-a)"]
+    address["yandex_vpc_address<br/>(morsh-addr-pub)"]
+end
+
+subgraph DNS
+    dns_zone["yandex_dns_zone<br/>(dns_pub)"]
+    dns_recordset_polar["yandex_dns_recordset<br/>(polar-net-ru)"]
+    dns_recordset_k8s["yandex_dns_recordset<br/>(k8s)"]
+    dns_recordset_jenkins["yandex_dns_recordset<br/>(jenkins)"]
+    dns_recordset_grafana["yandex_dns_recordset<br/>(grafana)"]
+    dns_recordset_skillfactory["yandex_dns_recordset<br/>(skillfactory)"]
+end
+
+subgraph ApplicationLoadBalancers
+    http_router["module.internet-alb-http-router-project"]
+    backend_jenkins["module.internet-alb-backend-jenkins-project"]
+    backend_grafana["module.internet-alb-backend-grafana-project"]
+    backend_skillfactory["module.internet-alb-backend-skillfactory-project"]
+    target_group_jenkins["module.internet-alb-target-group-jenkins-project"]
+    target_group_grafana["module.internet-alb-target-group-grafana-project"]
+    target_group_skillfactory["module.internet-alb-target-group-skillfactory-project"]
+    virtual_host_jenkins["module.internet-alb-virtual-host-jenkins-project"]
+    virtual_host_grafana["module.internet-alb-virtual-host-grafana-project"]
+    virtual_host_skillfactory["module.internet-alb-virtual-host-skillfactory-project"]
+end
+
+network --> subnet
+subnet --> address
+
+dns_zone
+dns_recordset_polar --> dns_zone
+dns_recordset_k8s --> dns_zone
+dns_recordset_jenkins --> dns_zone
+dns_recordset_grafana --> dns_zone
+dns_recordset_skillfactory --> dns_zone
+
+http_router --> backend_jenkins
+http_router --> backend_grafana
+http_router --> backend_skillfactory
+
+backend_jenkins --> target_group_jenkins
+backend_grafana --> target_group_grafana
+backend_skillfactory --> target_group_skillfactory
+
+target_group_jenkins --> virtual_host_jenkins
+target_group_grafana --> virtual_host_grafana
+target_group_skillfactory --> virtual_host_skillfactory
+
+```
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
