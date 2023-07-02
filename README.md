@@ -96,14 +96,16 @@ yandex_cm_certificate_polar_net_ru -- Secures --> internet-alb-virtual-host-jenk
 yandex_cm_certificate_polar_net_ru -- Secures --> internet-alb-virtual-host-grafana-project
 yandex_cm_certificate_polar_net_ru -- Used by --> resource-yandex_dns_recordset_polar_net_ru
 
-internet-alb-target-group-skillfactory-project -- Redirects traffic to --> k8s-node-control-plane
-internet-alb-virtual-host-jenkins-project -- Redirects traffic to --> k8s-outside-servers
-internet-alb-virtual-host-grafana-project -- Redirects traffic to --> k8s-outside-servers
+subgraph ApplicationLoadBalancers
+    internet-alb-target-group-skillfactory-project -- Redirects traffic to --> k8s-node-control-plane
+    internet-alb-virtual-host-jenkins-project -- Redirects traffic to --> k8s-outside-servers
+    internet-alb-virtual-host-grafana-project -- Redirects traffic to --> k8s-outside-servers
+end
 
 yandex_cm_certificate_authority_polar_net_ru -- Signs --> yandex_cm_certificate_polar_net_ru
 yandex_cm_certificate_revocation_list_polar_net_ru -- Revokes --> yandex_cm_certificate_polar_net_ru
 
-yandex_cm_certificate_polar_net_ru --> yandex_cm_ca_cert_polar_net_ru[Yandex CM CA Cert]
+yandex_cm_certificate_polar_net_ru --> yandex_cm_ca_cert_polar_net_ru[Let's Encrypt CA Cert]
 yandex_cm_certificate_authority_polar_net_ru --> yandex_cm_ca_cert_polar_net_ru
 yandex_cm_certificate_revocation_list_polar_net_ru --> yandex_cm_ca_cert_polar_net_ru
 
