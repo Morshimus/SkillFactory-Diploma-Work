@@ -19,7 +19,8 @@ spec:
 
   values:
     config:
+       serverPort: 3100
        clients:
-            - srv-ext-polar-003.polar.grp          
+            - http://srv-ext-polar-003.polar.grp/loki/api/v1/push          
 
 
