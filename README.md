@@ -352,6 +352,54 @@ resource "yandex_cm_certificate" "polar-net-ru" {
 > В целях безопасности, была применена Security Group к машинам за натом - разрешен только адрес запускающего apply data.http.myip , на ALB не распространяется. В идеале - все делаем через bastion, прописываем туннели для kube api - оставляем адрес только для ALB.
 ![image](https://ams03pap004files.storage.live.com/y4mo9-9adVBZ4o3k7q2qlpVl4AyWk0S_hTh0ZUUUbDi8DNGZMX4AaZpTXuHuMzuV5myk-u0SmVIGHcR3XckVmt1GBTNdBmKiqYhhsnSeqUSStxjhFCppdzffZAnfOBikQBM5NnzIr9b1u0Mc6zNijViVMQyKxaPGz3vNdlaFNvDfeyLEwP2aSc6wv_HDURxGK8a?encodeFailures=1&width=1756&height=802)
 
+> Внедрена преднастройка и обновления образов систем через cloud-init - посредством шаблонизации и передачи в модуль. Terraform ожидает успешного завершения процедур обновления и настройки систем, выполнено ожидание путем remote-exec cloud-init status --wait
+
+```hcl
+  provisioner "remote-exec" {
+    inline = [
+      "cloud-init status --wait"
+    ]
+    connection {
+      type        = "ssh"
+      user        = var.useros
+      private_key = var.adm_prv_key
+      host        = self.network_interface[count.index].nat_ip_address
+    }
+  }
+```
+
+```yaml
+#cloud-config
+users:
+  - name: ${useros}
+    groups: sudo
+    shell: /bin/bash
+    sudo: ['ALL=(ALL) NOPASSWD:ALL']
+    ssh-authorized-keys:
+      - ${adm_pub_key}
+package_update: true
+package_upgrade: true
+packages:
+  # Update the apt package index and install packages needed to use the Docker and Kubernetes apt repositories over HTTPS
+  - apt-transport-https
+  - ca-certificates
+  - curl
+  - gnupg
+  - lsb-release
+  - snap
+  - containerd
+
+power_state:
+ delay: "+1"
+ mode: reboot
+ message: Reboot
+ timeout: 1
+ condition: True
+```
+
+> После окончания шаблонизирования и cloud-init конфигов - на сцену выходить kubesrpay.
+
+
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
 
