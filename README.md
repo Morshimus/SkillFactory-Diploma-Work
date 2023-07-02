@@ -352,6 +352,99 @@ resource "yandex_cm_certificate" "polar-net-ru" {
 > В целях безопасности, была применена Security Group к машинам за натом - разрешен только адрес запускающего apply data.http.myip , на ALB не распространяется. В идеале - все делаем через bastion, прописываем туннели для kube api - оставляем адрес только для ALB.
 ![image](https://ams03pap004files.storage.live.com/y4mo9-9adVBZ4o3k7q2qlpVl4AyWk0S_hTh0ZUUUbDi8DNGZMX4AaZpTXuHuMzuV5myk-u0SmVIGHcR3XckVmt1GBTNdBmKiqYhhsnSeqUSStxjhFCppdzffZAnfOBikQBM5NnzIr9b1u0Mc6zNijViVMQyKxaPGz3vNdlaFNvDfeyLEwP2aSc6wv_HDURxGK8a?encodeFailures=1&width=1756&height=802)
 
+> **ВАЖНО!** Число нод и их назначения задается через переменные Terraform. Самое главное чтобы postfix значения для нод Kubernetes **были разные!!** . Значения  postfix для outside server могут пересекаться с node, но не с самими собой.
+иначе возникают проблемы с дупликатами значений map - которые используются в динамических циклах.
+
+```hcl
+variable "k8s_node_cp" {
+  type = object({
+    name        = map(string),
+    etcd_member = map(bool)
+  })
+  description = <<-EOT
+    Number of control plane nodes in k8s cluster. 
+    For name:
+      Key - is postfix
+      Value - is prefix
+    For etcd_member:
+      Key - is postfix
+      Value - is bool
+    EOT
+  default = {
+    name = {
+      "001" = "k8s-cp-polar-"
+    },
+    etcd_member = {
+      "001" = true
+    }
+  }
+}
+
+variable "k8s_node_worker" {
+  type = object({
+    name        = map(string)
+    etcd_member = map(bool)
+  })
+  description = <<-EOT
+    Number of worker nodes in k8s cluster.
+    For name:
+      Key - is postfix
+      Value - is prefix
+    For etcd_member:
+      Key - is postfix
+      Value - is bool
+    EOT
+  default = {
+    name = {
+      "002" = "k8s-worker-polar-"
+    },
+    etcd_member = {
+      "002" = false
+    }
+
+  }
+}
+
+variable "k8s_outside_srv" {
+  type = object({
+    name       = map(string)
+    ci-cd      = map(bool)
+    monitoring = map(bool)
+    bastion    = map(bool)
+  })
+  description = <<-EOT
+    Number of external servers outside of k8s cluster.
+    For name:
+      Key - is postfix
+      Value - is prefix
+    For ci-cd:
+      Key - is postfix
+      Value - is bool
+    For monitoring:
+      Key - is postfix
+      Value - is bool
+    For bastion:
+      Key - is postfix
+      Value - is bool     
+    EOT
+  default = {
+    name = {
+      "003" = "srv-ext-polar-"
+    },
+    ci-cd = {
+      "003" = true
+    },
+    monitoring = {
+      "003" = true
+    },
+    bastion = {}
+  }
+}
+
+```
+
+*Функционал multi control-plan node не доделан - нужен NLB для этого. Все остальное функционирует. Было решено опустить эту часть - так как она не является требуемой в задании Дипломного проекта. Тоесть - да по сути мы можем сделать DOCKER SWARM из 2ух серверов вместо 1 внешнего.*
+
 > Внедрена преднастройка и обновления образов систем через cloud-init - посредством шаблонизации и передачи в модуль. Terraform ожидает успешного завершения процедур обновления и настройки систем, выполнено ожидание путем remote-exec cloud-init status --wait
 
 ```hcl
