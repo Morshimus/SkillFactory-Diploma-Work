@@ -445,7 +445,7 @@ variable "k8s_outside_srv" {
 
 *Функционал multi control-plan node не доделан - нужен NLB для этого. Все остальное функционирует. Было решено опустить эту часть - так как она не является требуемой в задании Дипломного проекта. Тоесть - да по сути мы можем сделать DOCKER SWARM из 2ух серверов вместо 1 внешнего.*
 
-> Внедрена преднастройка и обновления образов систем через cloud-init - посредством шаблонизации и передачи в модуль. Terraform ожидает успешного завершения процедур обновления и настройки систем, выполнено ожидание путем remote-exec cloud-init status --wait
+> Внедрена преднастройка и обновление образов систем через cloud-init - посредством шаблонизации и передачи в модуль. Terraform ожидает успешного завершения процедур обновления и настройки систем, выполнено ожидание путем remote-exec cloud-init status --wait
 
 ```hcl
   provisioner "remote-exec" {
@@ -493,6 +493,78 @@ power_state:
 
 > После окончания шаблонизирования и cloud-init конфигов - на сцену выходить ansible при создании файла inventory, для настройки наших хостов monitoring и CI\CD - у нас это 1 хост - но возможно масштабирование - модули сделаны на новый лад и поддерживают for_each. 
 
+```yaml
+---
+- hosts: Jenkins-CI
+  gather_facts: yes
+  become: yes   
+  roles:
+    - role: Jenkins
+      vars:
+        jenkins_package_version: "1.2.0"
+      
+- hosts: monitoring
+  gather_facts: yes
+  become: yes
+  roles:
+     - role: Prometheus
+       vars:
+         node_exporter_targets:
+          - nodeexporter:9100
+          - k8s-cp-polar-001.polar.grp:30091
+          - k8s-worker-polar-002.polar.grp:30091
+         cadvisor_exporter_targets:
+          - cadvisor:8080
+          - k8s-cp-polar-001.polar.grp:9080
+          - k8s-worker-polar-002.polar.grp:9080
+         nginx_exporter_targets:
+          - k8s-cp-polar-001.polar.grp:10254
+          - k8s-worker-polar-002.polar.grp:10254
+         postgresql_exporter_targets:
+          - k8s-cp-polar-001.polar.grp:9187
+         Prometheus_Docker_root: /opt/morsh_monit
+         prometheus_package_version: "1.2.0"
+```
+
+*Прошу заметить что значения динамические. И меняются в зависимости от количества нод*
+
+```tpl
+---
+- hosts: Jenkins-CI
+  gather_facts: yes
+  become: yes   
+  roles:
+    - role: Jenkins
+      vars:
+        jenkins_package_version: "1.2.0"
+      
+- hosts: monitoring
+  gather_facts: yes
+  become: yes
+  roles:
+     - role: Prometheus
+       vars:
+         node_exporter_targets:
+          - nodeexporter:9100
+%{ for index, node in k8s_cluster_node_name ~}
+          - ${node}:30091
+%{ endfor ~}
+         cadvisor_exporter_targets:
+          - cadvisor:8080
+%{ for index, node in k8s_cluster_node_name ~}
+          - ${node}:9080
+%{ endfor ~}
+         nginx_exporter_targets:
+%{ for index, node in k8s_cluster_node_name ~}
+          - ${node}:10254
+%{ endfor ~}
+         postgresql_exporter_targets:
+%{ for index, node in k8s_cluster_cp_name ~}
+          - ${node}:9187
+%{ endfor ~}
+         Prometheus_Docker_root: /opt/morsh_monit
+         prometheus_package_version: "1.2.0"
+```
 
 > Теперь черед kubesrpay. Самый главный аттрибут который нам пригодится - override_system_hostname: false   - так как мы уже назначили имена нашим нодам. Выполнятся в моем случае из docker контейнера - время от 30 до 40 минут.
 
