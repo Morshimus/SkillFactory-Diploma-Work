@@ -18,20 +18,20 @@ locals {
     }
   )
 
-  raw_secrets_sf_web_app_template = templatefile( "${path.module}/templates/raw_secrets_sf_web_app.yaml.tpl", {
-   db_username = base64encode(data.ansiblevault_path.db_username.value)
-   db_password = base64encode(data.ansiblevault_path.db_password.value)
-   }
+  raw_secrets_sf_web_app_template = templatefile("${path.module}/templates/raw_secrets_sf_web_app.yaml.tpl", {
+    db_username = base64encode(data.ansiblevault_path.db_username.value)
+    db_password = base64encode(data.ansiblevault_path.db_password.value)
+    }
   )
 
-  raw_secrets_infra_template = templatefile( "${path.module}/templates/raw_secrets_infra.yaml.tpl", {
-   db_password = base64encode(data.ansiblevault_path.db_password.value)
-   db_postgres_password = base64encode(data.ansiblevault_path.db_postgres_password.value)
-   }
+  raw_secrets_infra_template = templatefile("${path.module}/templates/raw_secrets_infra.yaml.tpl", {
+    db_password          = base64encode(data.ansiblevault_path.db_password.value)
+    db_postgres_password = base64encode(data.ansiblevault_path.db_postgres_password.value)
+    }
   )
   k8s_cluster_node_ip_priv = merge(
-        { for i in keys(var.k8s_node_cp.name) : i => module.k8s-node-control-plane[i].internal_ip_address_server[0] },
-        { for i in keys(var.k8s_node_worker.name) : i => module.k8s-node-worker[i].internal_ip_address_server[0] }
+    { for i in keys(var.k8s_node_cp.name) : i => module.k8s-node-control-plane[i].internal_ip_address_server[0] },
+    { for i in keys(var.k8s_node_worker.name) : i => module.k8s-node-worker[i].internal_ip_address_server[0] }
   )
 
   k8s_cluster_cp_name     = { for i in keys(var.k8s_node_cp.name) : i => module.k8s-node-control-plane[i].hostname_server }
@@ -40,15 +40,22 @@ locals {
   k8s_cluster_cp_ip_pub  = length(keys(var.k8s_node_cp.name)) == 1 ? { for i in keys(var.k8s_node_cp.name) : "ip" => module.k8s-node-control-plane[i].external_ip_address_server[0] } : null
   k8s_cluster_cp_ip_priv = length(keys(var.k8s_node_cp.name)) == 1 ? { for i in keys(var.k8s_node_cp.name) : "ip" => module.k8s-node-control-plane[i].internal_ip_address_server[0] } : null
 
-  provisioning_yaml_tpl_template = templatefile( "${path.module}/templates/provisioning.yaml.tpl", {
-      
-      k8s_cluster_cp_name     = local.k8s_cluster_cp_name
-      k8s_cluster_node_name = merge(
-        local.k8s_cluster_cp_name,
-        local.k8s_cluster_worker_name
-      )
+  provisioning_yaml_tpl_template = templatefile("${path.module}/templates/provisioning.yaml.tpl", {
 
-   } 
+    k8s_cluster_cp_name = local.k8s_cluster_cp_name
+    k8s_cluster_node_name = merge(
+      local.k8s_cluster_cp_name,
+      local.k8s_cluster_worker_name
+    )
+
+    }
+  )
+
+  promtail_release_yaml_tpl = templatefile("${path.module}/templates/promtail_release.yaml.tpl", {
+
+    external_servers_name  = { for i in keys(var.k8s_outside_srv.name) : i => module.k8s-outside-servers[i].hostname_server }
+    monitoring_member_name = length(var.k8s_outside_srv.monitoring) > 0 ? { for i in keys(var.k8s_outside_srv.monitoring) : i => var.k8s_outside_srv.monitoring[i] } : null
+    }
   )
 
   ansible_template = templatefile(

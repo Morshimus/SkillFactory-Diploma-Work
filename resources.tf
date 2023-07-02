@@ -598,7 +598,7 @@ resource "local_file" "raw_secrets_infra" {
   filename = "${path.module}/raw_secrets_infra.yaml"
 
   provisioner "local-exec" {
-    command = <<EOF
+    command     = <<EOF
      . ./actions.ps1;
      if($(k --insecure-skip-tls-verify get svc  sealed-secrets -n kube-system)){kubeseal_resource -secretfile ./raw_secrets_infra.yaml  -destination './infra/sf-cluster/configs' | Out-Null;}
     EOF
@@ -615,7 +615,7 @@ resource "local_file" "raw_secrets_sf_web_app" {
   filename = "${path.module}/raw_secrets_sf_web_app.yaml"
 
   provisioner "local-exec" {
-    command = <<EOF
+    command     = <<EOF
      . ./actions.ps1;
      if($(k --insecure-skip-tls-verify get svc  sealed-secrets -n kube-system)){kubeseal_resource -secretfile ./raw_secrets_sf_web_app.yaml  -destination "./apps/sf-cluster/sf-web" | Out-Null;}
     EOF
@@ -627,8 +627,18 @@ resource "local_file" "raw_secrets_sf_web_app" {
   }
 }
 
+resource "local_file" "promtail_release_yaml" {
+  content  = local.promtail_release_yaml_tpl
+  filename = "${path.module}/apps/sf-cluster/release.yaml"
+
+  provisioner "local-exec" {
+    command     = "git add . ; git commit -am 'Updated promtail release.'; git push"
+    interpreter = ["powershell.exe", "-NoProfile", "-c"]
+  }
+}
+
 resource "local_file" "provisioning_yaml" {
-  content = local.provisioning_yaml_tpl_template
+  content  = local.provisioning_yaml_tpl_template
   filename = "${path.module}/provisioning.yaml"
 }
 resource "local_file" "yandex_inventory" {
