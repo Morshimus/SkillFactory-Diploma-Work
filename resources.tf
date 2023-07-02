@@ -626,7 +626,7 @@ resource "local_file" "raw_secrets_infra" {
   provisioner "local-exec" {
     command     = <<EOF
      . ./actions.ps1;
-     if($(k --insecure-skip-tls-verify get svc  sealed-secrets -n kube-system)){kubeseal_resource -secretfile ./raw_secrets_infra.yaml  -destination './infra/sf-cluster/configs' | Out-Null;}
+     if($(k --insecure-skip-tls-verify get svc  sealed-secrets -n kube-system)){kubeseal_resource -secretfile ./raw_secrets_infra.yaml  -destination './apps/sf-cluster/postgresql' | Out-Null;}
     EOF
     interpreter = ["powershell.exe", "-NoProfile", "-c"]
     environment = {
