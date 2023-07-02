@@ -80,14 +80,15 @@ graph LR
 
 subgraph CertificateManager
     CertificateManager[Certificate Manager]
+    
+    ssl-certificate[SSL Certificate]
+    certificate-authority[Certificate Authority]
+    certificate-revocation-list[Certificate Revocation List]
 
-    CertificateManager -- Manages --> ssl-certificate[SSL Certificate]
-    CertificateManager -- Manages --> certificate-authority[Certificate Authority]
-    CertificateManager -- Manages --> certificate-revocation-list[Certificate Revocation List]
+    ssl-certificate -- Manages --> yandex_cm_certificate_polar_net_ru[Yandex CM Certificate]
+    certificate-authority -- Manages --> yandex_cm_certificate_authority_polar_net_ru[Yandex CM Certificate Authority]
+    certificate-revocation-list -- Manages --> yandex_cm_certificate_revocation_list_polar_net_ru[Yandex CM Certificate Revocation List]
 
-    ssl-certificate --> yandex_cm_certificate_polar_net_ru[Yandex CM Certificate]
-    certificate-authority --> yandex_cm_certificate_authority_polar_net_ru[Yandex CM Certificate Authority]
-    certificate-revocation-list --> yandex_cm_certificate_revocation_list_polar_net_ru[Yandex CM Certificate Revocation List]
 end
 
 yandex_cm_certificate_polar_net_ru -- Secures --> internet-alb-target-group-skillfactory-project
