@@ -19,6 +19,12 @@ subgraph VPC
     address["yandex_vpc_address<br/>(morsh-addr-pub)"]
 end
 
+```
+
+```mermaid
+graph TD
+
+
 subgraph DNS
     dns_zone["yandex_dns_zone<br/>(dns_pub)"]
     dns_recordset_polar["yandex_dns_recordset<br/>(polar-net-ru)"]
@@ -27,6 +33,11 @@ subgraph DNS
     dns_recordset_grafana["yandex_dns_recordset<br/>(grafana)"]
     dns_recordset_skillfactory["yandex_dns_recordset<br/>(skillfactory)"]
 end
+```
+
+```mermaid
+
+graph TD
 
 subgraph ApplicationLoadBalancers
     http_router["module.internet-alb-http-router-project"]
@@ -97,12 +108,6 @@ subgraph ComputeInstances
     yandex_compute_instance_worker --> yandex_vpc_subnet_morsh_subnet_a
     yandex_compute_instance_outside_servers --> yandex_vpc_subnet_morsh_subnet_a
 end
-
-subnet(Subnet) -- Contains --> k8s-node-control-plane
-subnet -- Contains --> k8s-node-worker
-subnet -- Contains --> k8s-outside-servers
-
-subnet --> yandex_vpc_subnet_morsh_subnet_a[Yandex VPC Subnet]
 
 ```
 
