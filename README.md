@@ -295,6 +295,7 @@ Jenkins_Docker_root=/opt/morsh_ci
 ![image](https://ams03pap004files.storage.live.com/y4mnraSxVJ-faeC5D3YpUs6bsb8BnR2_hVrh7xh2Y0D9gADZmR8Uz6Gz04LQvFkjQa6UWTZgwezOBtDgCh_Ax6_b8VjC69MZK9plBYSiSu0pm_nxZKtP8NtVfoimQy1fOSx77G4ZdoR9Y81jOeQjGW3K9aF7rR3YfBJ4OI-FZ_wAxc3pQpPdhQcNWiaXsYRQEWD?encodeFailures=1&width=934&height=318)
 
 > Из схемы DNS видно что были созданы записи, k8s.polar.net.ru для связи с kube api, все остальные приложения - это ALB
+![image](https://ams03pap004files.storage.live.com/y4mAbg3UC70XJpnbTW-C_NCReZ2xymTfDSdOF9sIGxO9NbZGWVWPAOPWzotOgVXTkqBrDfwpZvR4XkoL0NW0jBQ6o5az3B2vqhBzzGm7_UQijZl-wx7tMoCHFuDNgwo5E_HbSZ67hl4YpUI6wFHLnKOp5r0JV0GZP8ExXCpAFraOCpbCpeZGzWOq12pfBY7Fr11?encodeFailures=1&width=856&height=681)
 
 > Создан ресурс CertificateManage c помощью которого автоматически обновляется challange cname в буличной DNS зоне polar.net.ru
 
