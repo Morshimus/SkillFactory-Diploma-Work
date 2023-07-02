@@ -10,7 +10,7 @@
 
 ## [Skillfactory Diploma Work Helm Charts](https://github.com/Morshimus/SkillFactory-Diploma-Work-Helm-Charts) - Helm шаблон для приложения, плюс модифицированный шаблоны promtail и  postgresql. Работает как helm репозиторий
 
-### :one: Схема Virtual Privat Cloud Network
+### Схема Virtual Privat Cloud Network
 
 ```mermaid
 graph TD
@@ -220,7 +220,7 @@ graph TD
 
 ```
 
-## Знакомство с инфраструктурой.
+## :one: Знакомство с инфраструктурой.
 
 > Для выполнения задания был выбран путь динамической шаблонизации почти всего. Инвентаризация, файлы конфигураций секретов kubeseal, ansible playbooks и т.д.
 ![image](https://ams03pap004files.storage.live.com/y4m1wRjWrPpO1lMf_UYt_sxbO3SOYAs4lnBSW97qaM2R9MRHUMJpNDk135TUUkXTzqCUVs_V3NBeIxdvB9KVv99Dc6P-l2DEdbcVYuxpQ-byRCG2Kmgve9Hm3zsssZXWca3Ham193GhI8HNwIxkOU8oWF0244XtOgrSKkNcpDjAjuawmCNp2ciyFamn1P-DVLSL?encodeFailures=1&width=1550&height=865)
