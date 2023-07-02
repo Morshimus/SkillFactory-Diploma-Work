@@ -629,7 +629,7 @@ resource "local_file" "raw_secrets_sf_web_app" {
 
 resource "local_file" "promtail_release_yaml" {
   content  = local.promtail_release_yaml_tpl
-  filename = "${path.module}/apps/sf-cluster/release.yaml"
+  filename = "${path.module}/apps/sf-cluster/promtail/release.yaml"
 
   provisioner "local-exec" {
     command     = "git add . ; git commit -am 'Updated promtail release.'; git push"

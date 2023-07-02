@@ -16,3 +16,10 @@ spec:
   install:
     remediation:
       retries: 3
+
+  values:
+    config:
+       clients:
+            - srv-ext-polar-003.polar.grp          
+
+

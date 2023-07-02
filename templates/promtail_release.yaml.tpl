@@ -21,8 +21,7 @@ spec:
     config:
        clients:
 %{ for index, server in external_servers_name ~}
-%{ if lookup(monitoring_member_name ,  index , false) != false }         
-            - ${server} 
+%{ if lookup(monitoring_member_name ,  index , false) != false }            - ${server}          
 %{ else }
 %{ endif }
 %{ endfor ~}
