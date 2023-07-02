@@ -19,11 +19,13 @@ subgraph VPC
     address["yandex_vpc_address<br/>(morsh-addr-pub)"]
 end
 
+network --> subnet
+subnet --> address
+
 ```
 
 ```mermaid
 graph TD
-
 
 subgraph DNS
     dns_zone["yandex_dns_zone<br/>(dns_pub)"]
@@ -33,6 +35,14 @@ subgraph DNS
     dns_recordset_grafana["yandex_dns_recordset<br/>(grafana)"]
     dns_recordset_skillfactory["yandex_dns_recordset<br/>(skillfactory)"]
 end
+
+dns_zone
+dns_recordset_polar --> dns_zone
+dns_recordset_k8s --> dns_zone
+dns_recordset_jenkins --> dns_zone
+dns_recordset_grafana --> dns_zone
+dns_recordset_skillfactory --> dns_zone
+
 ```
 
 ```mermaid
@@ -51,17 +61,6 @@ subgraph ApplicationLoadBalancers
     virtual_host_grafana["module.internet-alb-virtual-host-grafana-project"]
     virtual_host_skillfactory["module.internet-alb-virtual-host-skillfactory-project"]
 end
-
-network --> subnet
-subnet --> address
-
-dns_zone
-dns_recordset_polar --> dns_zone
-dns_recordset_k8s --> dns_zone
-dns_recordset_jenkins --> dns_zone
-dns_recordset_grafana --> dns_zone
-dns_recordset_skillfactory --> dns_zone
-
 http_router --> backend_jenkins
 http_router --> backend_grafana
 http_router --> backend_skillfactory
