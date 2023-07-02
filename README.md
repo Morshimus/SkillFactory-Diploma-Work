@@ -79,7 +79,7 @@ target_group_skillfactory --> virtual_host_skillfactory
 graph LR
 
 subgraph CertificateManager
-    CertificateManager[Certificate Manager]
+    CertificateManagerResource[Certificate Manager]
     
     ssl-certificate[SSL Certificate]
     certificate-authority[Certificate Authority]
