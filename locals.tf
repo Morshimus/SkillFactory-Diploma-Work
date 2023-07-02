@@ -2,11 +2,11 @@ locals {
 
   loc_path = "${path.module}/"
 
-  cloud-init = templatefile("${path.module}/templates/cloud-init.yaml.tpl", {
-    adm_pub_key = tls_private_key.key.public_key_openssh
-    useros      = var.useros
-    }
-  )
+  # cloud-init = templatefile("${path.module}/templates/cloud-init.yaml.tpl", {
+  #   adm_pub_key = tls_private_key.key.public_key_openssh
+  #   useros      = var.useros
+  #   }
+  # )
   cloud-init-k8s-node-deb = templatefile("${path.module}/templates/cloud-init-k8s-node-deb.yaml.tpl", {
     adm_pub_key = tls_private_key.key.public_key_openssh
     useros      = var.useros

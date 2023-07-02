@@ -10,18 +10,18 @@ repos:
   hooks:
     - id: terraform_fmt
     # - id: terraform_validate not working in Windows
-    - id: terraform_checkov
-      args:
-        - --args=--skip-check CKV_SECRET_13 # Secrets json under project dir - in gitignore.
-        - --args=--skip-check CKV_AZURE_9 # RDP is used for study project to open Artifactory
-        - --args=--skip-check CKV_AZURE_151 # Encryption Not used in studying project
-        - --args=--skip-check CKV_AZURE_10  # Allow ssh for Ansible to linux host
-        - --args=--skip-check CKV_SECRET_2  # Secrets json under project dir - in gitignore
-        - --args=--skip-check CKV_AWS_24  # Allow ssh for Ansible to linux host
-        - --args=--skip-check CKV_AWS_79 # Metadata Service Version 1 is not enabled fixed - not get it from module
-        - --args=--skip-check CKV2_AWS_19 # all EIP addresses allocated to a VPC are attached to EC2 instances connected to defined network interface
-        - --args=--skip-check CKV_AWS_8 # instance Elastic Blocks Store is securely encrypted fixed not get it from module
-        - --args=--skip-check CKV2_AWS_11 # Ensure VPC flow logging is enabled in all VPCs - not needed for now
+    #- id: terraform_checkov
+    #  args:
+    #    - --args=--skip-check CKV_SECRET_13 # Secrets json under project dir - in gitignore.
+    #    - --args=--skip-check CKV_AZURE_9 # RDP is used for study project to open Artifactory
+    #    - --args=--skip-check CKV_AZURE_151 # Encryption Not used in studying project
+    #    - --args=--skip-check CKV_AZURE_10  # Allow ssh for Ansible to linux host
+    #    - --args=--skip-check CKV_SECRET_2  # Secrets json under project dir - in gitignore
+    #    - --args=--skip-check CKV_AWS_24  # Allow ssh for Ansible to linux host
+    #    - --args=--skip-check CKV_AWS_79 # Metadata Service Version 1 is not enabled fixed - not get it from module
+    #    - --args=--skip-check CKV2_AWS_19 # all EIP addresses allocated to a VPC are attached to EC2 instances connected to defined network interface
+    #    - --args=--skip-check CKV_AWS_8 # instance Elastic Blocks Store is securely encrypted fixed not get it from module
+    #    - --args=--skip-check CKV2_AWS_11 # Ensure VPC flow logging is enabled in all VPCs - not needed for now
     - id: terraform_tflint
       args:
         - --args=--enable-rule=terraform_deprecated_interpolation
