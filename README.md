@@ -206,13 +206,13 @@ graph TD
 
     compute_instance_k8s_node_cp --> template_cloud-init-k8s-node-deb
     compute_instance_k8s_node_worker --> template_cloud-init-k8s-node-deb
-    compute_instance_k8s_outside_servers -->template_cloud-init-ci-cd-monitor-deb
+    compute_instance_k8s_outside_servers --> template_cloud-init-ci-cd-monitor-deb
     template_cloud-init-k8s-node-deb --> cloud-init-k8s-node-deb.yaml.tpl
     template_cloud-init-k8s-node-deb --> cloud-init-k8s-node-deb.yaml.tpl
     template_cloud-init-ci-cd-monitor-deb --> cloud-init-k8s-node-deb.yaml.tpl
-    cloud-init-k8s-node-deb.yaml.tpl --> compute_instance_k8s_node_cp
-    cloud-init-k8s-node-deb.yaml.tpl --> compute_instance_k8s_node_worker
-    cloud-init-k8s-node-deb.yaml.tpl --> compute_instance_k8s_outside_servers
+    template_cloud-init-k8s-node-deb --> compute_instance_k8s_node_cp
+    template_cloud-init-k8s-node-deb --> compute_instance_k8s_node_cp
+    template_cloud-init-ci-cd-monitor-deb --> compute_instance_k8s_outside_servers
 
 
 ```
