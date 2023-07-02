@@ -78,6 +78,41 @@ target_group_skillfactory --> virtual_host_skillfactory
 ```mermaid
 graph LR
 
+subgraph CertificateManager
+    CertificateManager[Certificate Manager]
+
+    CertificateManager -- Manages --> ssl-certificate[SSL Certificate]
+    CertificateManager -- Manages --> certificate-authority[Certificate Authority]
+    CertificateManager -- Manages --> certificate-revocation-list[Certificate Revocation List]
+
+    ssl-certificate --> yandex_cm_certificate_polar_net_ru[Yandex CM Certificate]
+    certificate-authority --> yandex_cm_certificate_authority_polar_net_ru[Yandex CM Certificate Authority]
+    certificate-revocation-list --> yandex_cm_certificate_revocation_list_polar_net_ru[Yandex CM Certificate Revocation List]
+end
+
+yandex_cm_certificate_polar_net_ru -- Secures --> internet-alb-target-group-skillfactory-project
+yandex_cm_certificate_polar_net_ru -- Secures --> internet-alb-virtual-host-jenkins-project
+yandex_cm_certificate_polar_net_ru -- Secures --> internet-alb-virtual-host-grafana-project
+yandex_cm_certificate_polar_net_ru -- Used by --> resource-yandex_dns_recordset_polar_net_ru
+
+internet-alb-target-group-skillfactory-project -- Redirects traffic to --> k8s-node-control-plane
+internet-alb-virtual-host-jenkins-project -- Redirects traffic to --> k8s-outside-servers
+internet-alb-virtual-host-grafana-project -- Redirects traffic to --> k8s-outside-servers
+
+yandex_cm_certificate_authority_polar_net_ru -- Signs --> yandex_cm_certificate_polar_net_ru
+yandex_cm_certificate_revocation_list_polar_net_ru -- Revokes --> yandex_cm_certificate_polar_net_ru
+
+yandex_cm_certificate_polar_net_ru --> yandex_cm_ca_cert_polar_net_ru[Yandex CM CA Cert]
+yandex_cm_certificate_authority_polar_net_ru --> yandex_cm_ca_cert_polar_net_ru
+yandex_cm_certificate_revocation_list_polar_net_ru --> yandex_cm_ca_cert_polar_net_ru
+
+resource-yandex_dns_recordset_polar_net_ru --> yandex_cm_certificate_polar_net_ru
+
+```
+
+```mermaid
+graph LR
+
 subgraph ComputeInstances
     ComputeInstances[Compute Instances] -- Contains --> k8s-node-control-plane[k8s-node-control-plane]
     ComputeInstances -- Contains --> k8s-node-worker[k8s-node-worker]
