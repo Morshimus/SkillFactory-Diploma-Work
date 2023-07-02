@@ -447,6 +447,23 @@ resource "yandex_cm_certificate" "polar-net-ru" {
 #              Security Groups                     #
 #                                                  #
 ####################################################
+resource "yandex_vpc_security_group" "allow_myip" {
+  name        = "myip"
+  description = "allow only my ip incoming connections"
+  network_id  = yandex_vpc_network.morsh-network.id
+  ingress {
+    protocol       = "ANY"
+    description    = "my ingress"
+    v4_cidr_blocks = ["${chomp(data.http.myip.body)}/32", "192.168.21.0/24"]
+  }
+
+  egress {
+    protocol       = "ANY"
+    description    = "allow egress"
+    v4_cidr_blocks = ["0.0.0.0/0", ]
+  }
+}
+
 
 ####################################################
 #             Compute Instances                    #
@@ -484,8 +501,9 @@ module "k8s-node-control-plane" {
 
   network_interface = [
     {
-      subnet_id = yandex_vpc_subnet.morsh-subnet-a.id
-      nat       = true
+      subnet_id          = yandex_vpc_subnet.morsh-subnet-a.id
+      nat                = true
+      security_group_ids = [yandex_vpc_security_group.allow_myip.id]
     }
   ]
 
@@ -516,8 +534,9 @@ module "k8s-node-worker" {
 
   network_interface = [
     {
-      subnet_id = yandex_vpc_subnet.morsh-subnet-a.id
-      nat       = true
+      subnet_id          = yandex_vpc_subnet.morsh-subnet-a.id
+      nat                = true
+      security_group_ids = [yandex_vpc_security_group.allow_myip.id]
     }
   ]
 
@@ -537,6 +556,7 @@ module "k8s-outside-servers" {
 
   for_each = var.k8s_outside_srv.name
 
+
   source_image_family = "ubuntu-2204-lts"
   boot_disk = {
     initialize_params = {
@@ -547,8 +567,9 @@ module "k8s-outside-servers" {
 
   network_interface = [
     {
-      subnet_id = yandex_vpc_subnet.morsh-subnet-a.id
-      nat       = true
+      subnet_id          = yandex_vpc_subnet.morsh-subnet-a.id
+      nat                = true
+      security_group_ids = [yandex_vpc_security_group.allow_myip.id]
     }
   ]
 

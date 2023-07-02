@@ -1,3 +1,7 @@
+data "http" "myip" {
+  url = "http://ipv4.icanhazip.com"
+}
+
 data "ansiblevault_path" "github-token" {
   path = "${path.module}/secrets.yml"
   key  = "github-token"

@@ -13,6 +13,10 @@ terraform {
       source  = "hashicorp/tls"
       version = "~> 4.0"
     }
+    http = {
+      source  = "hashicorp/http"
+      version = "~> 3.4.0"
+    }
     ansiblevault = {
       source  = "MeilleursAgents/ansiblevault"
       version = "= 2.2.0"
