@@ -47,6 +47,11 @@ resource "yandex_dns_recordset" "polar-net-ru" {
   data    = [yandex_cm_certificate.polar-net-ru.challenges[count.index].dns_value]
   ttl     = 60
 
+  provisioner "local-exec" {
+    command     = "Wait-Event -Timeout 600"
+    interpreter = ["powershell.exe", "-NoProfile", "-c"]
+  }
+
 }
 
 resource "yandex_dns_recordset" "k8s" {
@@ -454,7 +459,7 @@ resource "yandex_vpc_security_group" "allow_myip" {
   ingress {
     protocol       = "ANY"
     description    = "my ingress"
-    v4_cidr_blocks = ["${chomp(data.http.myip.body)}/32", "192.168.21.0/24"]
+    v4_cidr_blocks = ["${chomp(data.http.myip.body)}/32", var.subnet_a_v4_cidr_blocks_yandex[0]]
   }
 
   egress {
