@@ -651,11 +651,14 @@ resource "local_file" "yandex_inventory" {
      wsl -e /bin/bash -c 'cp .vault_pass_diploma  ~/.vault_pass_diploma ; chmod 0600 ~/.vault_pass_diploma';
      wsl -e /bin/bash -c 'cp SSH_KEY_FINAL  ~/.ssh/SSH_KEY_FINAL ; chmod 0600 ~/.ssh/SSH_KEY_FINAL';
      . ./actions.ps1;
+     UpdateAnsibleRoles;
+     ansible-playbook -secret;
      kubespray;
      $ConnectionConf= gc $env:KUBECONFIG;
      $ConnectionConf=$ConnectionConf  -replace "${lookup(local.k8s_cluster_cp_ip_priv, "ip", 0)}", "${lookup(local.k8s_cluster_cp_ip_pub, "ip", 0)}"; 
      $ConnectionConf | Set-Content -Encoding UTF8 $env:KUBECONFIG; 
-     flux_bootstrap; Wait-event -Timeout 300;
+     flux_bootstrap; 
+     do{k --insecure-skip-tls-verify  get svc  sealed-secrets -n kube-system }while( $? -like $false);
      kubeseal_refresh
     EOF
     interpreter = ["powershell.exe", "-NoProfile", "-c"]

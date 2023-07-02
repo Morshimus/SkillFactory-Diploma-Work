@@ -4,6 +4,8 @@
   become: yes   
   roles:
     - role: Jenkins
+      vars:
+        jenkins_package_version: "1.2.0"
       
 - hosts: monitoring
   gather_facts: yes
@@ -30,3 +32,4 @@
           - ${node}:9187
 %{ endfor ~}
          Prometheus_Docker_root: /opt/morsh_monit
+         prometheus_package_version: "1.2.0"
