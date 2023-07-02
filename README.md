@@ -115,9 +115,9 @@ resource-yandex_dns_recordset_polar_net_ru --> yandex_cm_certificate_polar_net_r
 graph LR
 
 subgraph ComputeInstances
-    ComputeInstances[Compute Instances] -- Contains --> k8s-node-control-plane[k8s-node-control-plane]
-    ComputeInstances -- Contains --> k8s-node-worker[k8s-node-worker]
-    ComputeInstances -- Contains --> k8s-outside-servers[k8s-outside-servers]
+    ComputeInstancesResources[Compute Instances] -- Contains --> k8s-node-control-plane[k8s-node-control-plane]
+    ComputeInstancesResources -- Contains --> k8s-node-worker[k8s-node-worker]
+    ComputeInstancesResources -- Contains --> k8s-outside-servers[k8s-outside-servers]
 
     k8s-node-control-plane -- Connects to --> k8s-node-control-plane-instance[k8s-node-control-plane Instance]
     k8s-node-worker -- Connects to --> k8s-node-worker-instance[k8s-node-worker Instance]
