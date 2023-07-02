@@ -711,6 +711,7 @@ resource "local_file" "raw_secrets_sf_web_app" {
 }
 ```
 
+## Jenkins, помогай. Строим Pipline на Jenkins в K8S cluster.
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
