@@ -10,7 +10,7 @@
 
 ## [Skillfactory Diploma Work Helm Charts](https://github.com/Morshimus/SkillFactory-Diploma-Work-Helm-Charts) - Helm шаблон для приложения, плюс модифицированный шаблоны promtail и  postgresql. Работает как helm репозиторий
 
-### Схема Virtual Privat Cloud Network
+### :one: Схема Virtual Privat Cloud Network
 
 ```mermaid
 graph TD
@@ -711,7 +711,7 @@ resource "local_file" "raw_secrets_sf_web_app" {
 }
 ```
 
-## Jenkins, помогай. Строим Pipline на Jenkins в K8S cluster.
+## :two: Jenkins, помогай. Строим Pipline на Jenkins в K8S cluster.
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
