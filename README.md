@@ -10,6 +10,8 @@
 
 ## [Skillfactory Diploma Work Helm Charts](https://github.com/Morshimus/SkillFactory-Diploma-Work-Helm-Charts) - Helm шаблон для приложения, плюс модифицированный шаблоны promtail и  postgresql. Работает как helm репозиторий
 
+### Схема Virtual Privat Cloud Network
+
 ```mermaid
 graph TD
 
@@ -23,6 +25,8 @@ network --> subnet
 subnet --> address
 
 ```
+
+### Схема DNS
 
 ```mermaid
 graph TD
@@ -44,6 +48,8 @@ dns_recordset_grafana --> dns_zone
 dns_recordset_skillfactory --> dns_zone
 
 ```
+
+### Схема Application Load Balancers
 
 ```mermaid
 
@@ -74,6 +80,7 @@ target_group_grafana --> virtual_host_grafana
 target_group_skillfactory --> virtual_host_skillfactory
 
 ```
+### Схема Certificate Manager
 
 ```mermaid
 graph LR
@@ -112,6 +119,7 @@ yandex_cm_certificate_revocation_list_polar_net_ru --> yandex_cm_ca_cert_polar_n
 resource-yandex_dns_recordset_polar_net_ru --> yandex_cm_certificate_polar_net_ru
 
 ```
+### Схема Compute Instances
 
 ```mermaid
 graph LR
@@ -147,6 +155,8 @@ subgraph ComputeInstances
 end
 
 ```
+
+### Схема Local Files
 
 ```mermaid
 
