@@ -220,6 +220,460 @@ graph TD
 
 ```
 
+## Знакомство с инфраструктурой.
+
+> Для выполнения задания был выбран путь динамической шаблонизации почти всего. Инвентаризация, файлы конфигураций секретов kubeseal, ansible playbooks и т.д.
+![image](https://ams03pap004files.storage.live.com/y4m1wRjWrPpO1lMf_UYt_sxbO3SOYAs4lnBSW97qaM2R9MRHUMJpNDk135TUUkXTzqCUVs_V3NBeIxdvB9KVv99Dc6P-l2DEdbcVYuxpQ-byRCG2Kmgve9Hm3zsssZXWca3Ham193GhI8HNwIxkOU8oWF0244XtOgrSKkNcpDjAjuawmCNp2ciyFamn1P-DVLSL?encodeFailures=1&width=1550&height=865)
+
+```tpl
+[all]
+%{ for index, node in k8s_cluster_node_name ~}
+${node}  ansible_host=${lookup(k8s_cluster_node_ip, index, 0 )} ansible_user=${user} ansible_become=yes %{ if lookup(etcd_member_name,  index , false) != false }etcd_member_name=etcd${index}%{ else }%{ endif }
+%{ endfor ~}
+
+%{ if bastion_member_name != null}
+[bastion]
+%{ for index, server in external_servers_name.name ~}
+%{ if lookup(bastion_member_name ,  index , false) != false }${server} ansible_host=${lookup(external_servers_ip, index, 0)} ansible_user=${user}
+%{ else }
+%{ endif }
+%{ endfor ~}
+%{ else }
+%{ endif }
+
+[kube-master]
+%{ for index, node in k8s_cluster_cp_name ~}
+${node}
+%{ endfor ~}
+
+
+[etcd]
+%{ for index, node in k8s_cluster_node_name ~}
+%{ if lookup(etcd_member_name,  index , false) != false }${node}
+%{ else }
+%{ endif }
+%{ endfor ~}
+
+[kube-node]
+%{ for index, node in k8s_cluster_worker_name ~}
+${node}
+%{ endfor ~}
+
+
+[calico-rr]
+
+[k8s-cluster:children]
+kube-master
+kube-node
+calico-rr
+
+%{ if monitoring_member_name != null}
+[monitoring]
+%{ for index, server in external_servers_name ~}
+%{ if lookup(monitoring_member_name ,  index , false) != false }${server} ansible_host=${lookup(external_servers_ip, index, 0)} ansible_user=${user} ansible_become=yes
+%{ else }
+%{ endif }
+%{ endfor ~}
+%{ else }
+%{ endif }
+
+%{ if ci_cd_member_name != null}
+[Jenkins-CI]
+%{ for index, server in external_servers_name ~}
+%{ if lookup(ci_cd_member_name ,  index , false) != false }${server} ansible_host=${lookup(external_servers_ip, index, 0)} ansible_user=${user} ansible_become=yes
+%{ else }
+%{ endif }
+%{ endfor ~}
+[Jenkins-CI:vars]
+Jenkins_Docker_root=/opt/morsh_ci
+%{ else }
+%{ endif }
+
+```
+
+> Было решено купить временный домен для дипломного проекта, им стал дешевенький polar.net.ru 3его уровня, но нам хватит более чем. Была проведена делегация домена в Yandex Cloud.
+![image](https://ams03pap004files.storage.live.com/y4mnraSxVJ-faeC5D3YpUs6bsb8BnR2_hVrh7xh2Y0D9gADZmR8Uz6Gz04LQvFkjQa6UWTZgwezOBtDgCh_Ax6_b8VjC69MZK9plBYSiSu0pm_nxZKtP8NtVfoimQy1fOSx77G4ZdoR9Y81jOeQjGW3K9aF7rR3YfBJ4OI-FZ_wAxc3pQpPdhQcNWiaXsYRQEWD?encodeFailures=1&width=934&height=318)
+
+> Из схемы DNS видно что были созданы записи, k8s.polar.net.ru для связи с kube api, все остальные приложения - это ALB
+![image](https://ams03pap004files.storage.live.com/y4mAbg3UC70XJpnbTW-C_NCReZ2xymTfDSdOF9sIGxO9NbZGWVWPAOPWzotOgVXTkqBrDfwpZvR4XkoL0NW0jBQ6o5az3B2vqhBzzGm7_UQijZl-wx7tMoCHFuDNgwo5E_HbSZ67hl4YpUI6wFHLnKOp5r0JV0GZP8ExXCpAFraOCpbCpeZGzWOq12pfBY7Fr11?encodeFailures=1&width=856&height=681)
+
+> Создан ресурс CertificateManage c помощью которого автоматически обновляется challange cname в буличной DNS зоне polar.net.ru
+![image](https://ams03pap004files.storage.live.com/y4m4nYK3DzjfSg1C6gc1DzOdMFe1xA0BhRnr2u6HZj9AaEV-8NkjID0jw9GBRbJWtgm6I5wWxqaVyw8xP33Sc7F0MMrjtQf_4kzcNmuF8fSU8jgp8AFSqID92fPN8Gk_jQTHrZYTEncbeMsIYvRKtMmWB0TCGi8-11r55sIW1bQAYyExJMePgX9O0zQDGsmlF_s?encodeFailures=1&width=1072&height=679)
+
+*Особеноостью в yandex является то, что terraform пытается пересоздать СM после каждого timstamp измениния. Принуждаем его расслабиться  и игнорировать изменения. Также, ставим таймаут при изменении\создании записи challange - должна пройти валидация, прежде чем сертифика будет выпущен\перевыпущен*
+
+```hcl
+resource "yandex_dns_recordset" "polar-net-ru" {
+  count   = yandex_cm_certificate.polar-net-ru.managed[0].challenge_count
+  zone_id = yandex_dns_zone.dns_pub.id
+  name    = yandex_cm_certificate.polar-net-ru.challenges[count.index].dns_name
+  type    = yandex_cm_certificate.polar-net-ru.challenges[count.index].dns_type
+  data    = [yandex_cm_certificate.polar-net-ru.challenges[count.index].dns_value]
+  ttl     = 60
+
+  provisioner "local-exec" {
+    command     = "Wait-Event -Timeout 600"
+    interpreter = ["powershell.exe", "-NoProfile", "-c"]
+  }
+
+}
+
+resource "yandex_cm_certificate" "polar-net-ru" {
+  name    = "polar-net-ru"
+  domains = ["polar.net.ru", "*.polar.net.ru"]
+
+  managed {
+    challenge_type  = "DNS_CNAME"
+    challenge_count = 1
+  }
+
+  lifecycle {
+    ignore_changes = [
+      challenges,
+      created_at,
+      domains,
+      folder_id,
+      id,
+      issued_at,
+      issuer,
+      labels,
+      name,
+      status,
+      subject,
+      type,
+      updated_at
+
+    ]
+  }
+}
+```
+
+
+> В целях безопасности, была применена Security Group к машинам за натом - разрешен только адрес запускающего apply data.http.myip , на ALB не распространяется. В идеале - все делаем через bastion, прописываем туннели для kube api - оставляем адрес только для ALB.
+![image](https://ams03pap004files.storage.live.com/y4mo9-9adVBZ4o3k7q2qlpVl4AyWk0S_hTh0ZUUUbDi8DNGZMX4AaZpTXuHuMzuV5myk-u0SmVIGHcR3XckVmt1GBTNdBmKiqYhhsnSeqUSStxjhFCppdzffZAnfOBikQBM5NnzIr9b1u0Mc6zNijViVMQyKxaPGz3vNdlaFNvDfeyLEwP2aSc6wv_HDURxGK8a?encodeFailures=1&width=1756&height=802)
+
+> **ВАЖНО!** Число нод и их назначения задается через переменные Terraform. Самое главное чтобы postfix значения для нод Kubernetes **были разные!!** . иначе возникают проблемы с дупликатами значений map - которые используются в динамических циклах. Значения  postfix для outside server могут пересекаться с node, но не с самими собой.
+
+
+```hcl
+variable "k8s_node_cp" {
+  type = object({
+    name        = map(string),
+    etcd_member = map(bool)
+  })
+  description = <<-EOT
+    Number of control plane nodes in k8s cluster. 
+    For name:
+      Key - is postfix
+      Value - is prefix
+    For etcd_member:
+      Key - is postfix
+      Value - is bool
+    EOT
+  default = {
+    name = {
+      "001" = "k8s-cp-polar-"
+    },
+    etcd_member = {
+      "001" = true
+    }
+  }
+}
+
+variable "k8s_node_worker" {
+  type = object({
+    name        = map(string)
+    etcd_member = map(bool)
+  })
+  description = <<-EOT
+    Number of worker nodes in k8s cluster.
+    For name:
+      Key - is postfix
+      Value - is prefix
+    For etcd_member:
+      Key - is postfix
+      Value - is bool
+    EOT
+  default = {
+    name = {
+      "002" = "k8s-worker-polar-"
+    },
+    etcd_member = {
+      "002" = false
+    }
+
+  }
+}
+
+variable "k8s_outside_srv" {
+  type = object({
+    name       = map(string)
+    ci-cd      = map(bool)
+    monitoring = map(bool)
+    bastion    = map(bool)
+  })
+  description = <<-EOT
+    Number of external servers outside of k8s cluster.
+    For name:
+      Key - is postfix
+      Value - is prefix
+    For ci-cd:
+      Key - is postfix
+      Value - is bool
+    For monitoring:
+      Key - is postfix
+      Value - is bool
+    For bastion:
+      Key - is postfix
+      Value - is bool     
+    EOT
+  default = {
+    name = {
+      "003" = "srv-ext-polar-"
+    },
+    ci-cd = {
+      "003" = true
+    },
+    monitoring = {
+      "003" = true
+    },
+    bastion = {}
+  }
+}
+
+```
+
+*Функционал multi control-plan node не доделан - нужен NLB для этого. Все остальное функционирует. Было решено опустить эту часть - так как она не является требуемой в задании Дипломного проекта. Тоесть - да по сути мы можем сделать DOCKER SWARM из 2ух серверов вместо 1 внешнего.*
+
+> Внедрена преднастройка и обновление образов систем через cloud-init - посредством шаблонизации и передачи в модуль. Terraform ожидает успешного завершения процедур обновления и настройки систем, выполнено ожидание путем remote-exec cloud-init status --wait
+
+```hcl
+  provisioner "remote-exec" {
+    inline = [
+      "cloud-init status --wait"
+    ]
+    connection {
+      type        = "ssh"
+      user        = var.useros
+      private_key = var.adm_prv_key
+      host        = self.network_interface[count.index].nat_ip_address
+    }
+  }
+```
+
+```yaml
+#cloud-config
+users:
+  - name: ${useros}
+    groups: sudo
+    shell: /bin/bash
+    sudo: ['ALL=(ALL) NOPASSWD:ALL']
+    ssh-authorized-keys:
+      - ${adm_pub_key}
+package_update: true
+package_upgrade: true
+packages:
+  # Update the apt package index and install packages needed to use the Docker and Kubernetes apt repositories over HTTPS
+  - apt-transport-https
+  - ca-certificates
+  - curl
+  - gnupg
+  - lsb-release
+  - snap
+  - containerd
+
+power_state:
+ delay: "+1"
+ mode: reboot
+ message: Reboot
+ timeout: 1
+ condition: True
+```
+*В конец машины перезагружаются.*
+
+> После окончания шаблонизирования и cloud-init конфигов - на сцену выходить ansible при создании файла inventory, для настройки наших хостов monitoring и CI\CD - у нас это 1 хост - но возможно масштабирование - модули сделаны на новый лад и поддерживают for_each. 
+
+```yaml
+---
+- hosts: Jenkins-CI
+  gather_facts: yes
+  become: yes   
+  roles:
+    - role: Jenkins
+      vars:
+        jenkins_package_version: "1.2.0"
+      
+- hosts: monitoring
+  gather_facts: yes
+  become: yes
+  roles:
+     - role: Prometheus
+       vars:
+         node_exporter_targets:
+          - nodeexporter:9100
+          - k8s-cp-polar-001.polar.grp:30091
+          - k8s-worker-polar-002.polar.grp:30091
+         cadvisor_exporter_targets:
+          - cadvisor:8080
+          - k8s-cp-polar-001.polar.grp:9080
+          - k8s-worker-polar-002.polar.grp:9080
+         nginx_exporter_targets:
+          - k8s-cp-polar-001.polar.grp:10254
+          - k8s-worker-polar-002.polar.grp:10254
+         postgresql_exporter_targets:
+          - k8s-cp-polar-001.polar.grp:9187
+         Prometheus_Docker_root: /opt/morsh_monit
+         prometheus_package_version: "1.2.0"
+```
+
+*Прошу заметить что значения динамические. И меняются в зависимости от количества нод*
+
+```tpl
+---
+- hosts: Jenkins-CI
+  gather_facts: yes
+  become: yes   
+  roles:
+    - role: Jenkins
+      vars:
+        jenkins_package_version: "1.2.0"
+      
+- hosts: monitoring
+  gather_facts: yes
+  become: yes
+  roles:
+     - role: Prometheus
+       vars:
+         node_exporter_targets:
+          - nodeexporter:9100
+%{ for index, node in k8s_cluster_node_name ~}
+          - ${node}:30091
+%{ endfor ~}
+         cadvisor_exporter_targets:
+          - cadvisor:8080
+%{ for index, node in k8s_cluster_node_name ~}
+          - ${node}:9080
+%{ endfor ~}
+         nginx_exporter_targets:
+%{ for index, node in k8s_cluster_node_name ~}
+          - ${node}:10254
+%{ endfor ~}
+         postgresql_exporter_targets:
+%{ for index, node in k8s_cluster_cp_name ~}
+          - ${node}:9187
+%{ endfor ~}
+         Prometheus_Docker_root: /opt/morsh_monit
+         prometheus_package_version: "1.2.0"
+```
+
+> Теперь черед kubesrpay. Самый главный аттрибут который нам пригодится - override_system_hostname: false   - так как мы уже назначили имена нашим нодам. Выполнятся в моем случае из docker контейнера - время от 30 до 40 минут.
+
+```ini
+
+[all]
+k8s-cp-polar-001.polar.grp  ansible_host=51.250.6.184 ansible_user=morsh-adm ansible_become=yes etcd_member_name=etcd001
+k8s-worker-polar-002.polar.grp  ansible_host=158.160.106.116 ansible_user=morsh-adm ansible_become=yes 
+
+
+
+
+[kube-master]
+k8s-cp-polar-001.polar.grp
+
+
+[etcd]
+k8s-cp-polar-001.polar.grp
+
+
+
+
+[kube-node]
+k8s-worker-polar-002.polar.grp
+
+
+[calico-rr]
+
+[k8s-cluster:children]
+kube-master
+kube-node
+calico-rr
+
+
+[monitoring]
+srv-ext-polar-003.polar.grp ansible_host=158.160.105.38 ansible_user=morsh-adm ansible_become=yes
+
+
+
+
+[Jenkins-CI]
+srv-ext-polar-003.polar.grp ansible_host=158.160.105.38 ansible_user=morsh-adm ansible_become=yes
+
+[Jenkins-CI:vars]
+Jenkins_Docker_root=/opt/morsh_ci
+
+
+```
+
+> И мы подходим к самому вкусному. Flux -  запускаем его и ждем инициализации.И далее Завершаем наш парад kubeseal - ждем пока создастся service sealed-secrets , иначе выполнение не будет успешным. Прилагаю скрипт всего действа, функции из actions.ps1 файла.
+
+```hcl
+resource "local_file" "yandex_inventory" {
+  content  = local.ansible_template
+  filename = "${path.module}/inventory/sf-cluster/inventory.ini"
+
+  provisioner "local-exec" {
+    command     = <<EOF
+     Wait-Event -Timeout 120;
+     wsl -e /bin/bash -c 'cp .vault_pass_diploma  ~/.vault_pass_diploma ; chmod 0600 ~/.vault_pass_diploma'; ## Настраиваем секреты ansible-vault
+     wsl -e /bin/bash -c 'cp SSH_KEY_FINAL  ~/.ssh/SSH_KEY_FINAL ; chmod 0600 ~/.ssh/SSH_KEY_FINAL'; ## Настраиваем ssh приватный ключ - который тоже динамический.
+     . ./actions.ps1; ## Запускаем наш wrapper который  - переменные среды указаны ниже и взяты из загифрованного secrets.yml.
+     UpdateAnsibleRoles; ## обновляем роли через ansible-galaxy из наших репозиториев, которые указаны  в самом начале этого проекта.
+     ansible-playbook -secret;  ## Устанавлиаем роли с помощью динаического плейбука provisioning.yaml
+     kubespray; ## Запускаем kubespray - монтируем директорию inventory\sf-cluster
+     $ConnectionConf= gc $env:KUBECONFIG; 
+     $ConnectionConf=$ConnectionConf  -replace "${lookup(local.k8s_cluster_cp_ip_priv, "ip", 0)}", "${lookup(local.k8s_cluster_cp_ip_pub, "ip", 0)}";
+     $ConnectionConf | Set-Content -Encoding UTF8 $env:KUBECONFIG;  ## Производим модификацию адреса подключения kube api на внешний адрес.
+     flux_bootstrap; ## Инициализируем flux в clusters\sf-cluster\flux-system. После выполнения сразу же начинается kustomization инфраструктуры кубера - далее приложения.
+     do{k --insecure-skip-tls-verify  get svc  sealed-secrets -n kube-system }while( $? -like $false); ## Ждем поднятия сервиса sealed-secrets, чтобы сгенерировать зашифрованные секреты.
+     kubeseal_refresh ## После успешной генерации секретов, делается коммит, и push - Все, они уже во Flux, под надзором Kusтомизатора.
+    EOF
+    interpreter = ["powershell.exe", "-NoProfile", "-c"]
+
+    environment = {
+      GITHUB_TOKEN = data.ansiblevault_path.github-token.value
+      GITHUB_USER  = data.ansiblevault_path.github-user.value
+    }
+  }
+}
+```
+
+> Ниже приведу функции kubeseal из actions.ps1, и также создание сырых(не зашифрованных) секретов из темплейтов (которые в gitignore).  Kubeseal применяется при изменении паролей в не зашифрованных секретах (также если сервис существует, если нет, ожидает общего конфига) - но лучше этого не делать на рабочем кластере, либо делать по-умному - мы плавно переходим к helm ci cd части.
+
+```ps1
+function kubeseal_resource {
+    Param ( 
+     [Parameter(Mandatory=$true, Position=0)]
+     [string]$secretfile,
+     [Parameter(Mandatory=$false, Position=0)]
+     [string]$destination
+     )
+  
+    Get-content $secretfile | kubeseal --insecure-skip-tls-verify  --controller-name=sealed-secrets --controller-namespace=kube-system --format yaml > $destination\sealed-secrets.yaml; if($?){
+
+    git add .;
+    git commit -am "Updated sealed secrets at  $destination" ;
+    git push
+
+    }
+}
+
+function kubeseal_refresh {
+    kubeseal_resource -secretfile .\raw_secrets_infra.yaml  -destination "$((Get-Location).Path)\apps\sf-cluster\postgresql" | Out-Null;
+    kubeseal_resource -secretfile .\raw_secrets_sf_web_app.yaml  -destination "$((Get-Location).Path)\apps\sf-cluster\sf-web"| Out-Null;
+}
+```
+
+
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
 
