@@ -300,7 +300,7 @@ Jenkins_Docker_root=/opt/morsh_ci
 > Создан ресурс CertificateManage c помощью которого автоматически обновляется challange cname в буличной DNS зоне polar.net.ru
 ![image](https://ams03pap004files.storage.live.com/y4m4nYK3DzjfSg1C6gc1DzOdMFe1xA0BhRnr2u6HZj9AaEV-8NkjID0jw9GBRbJWtgm6I5wWxqaVyw8xP33Sc7F0MMrjtQf_4kzcNmuF8fSU8jgp8AFSqID92fPN8Gk_jQTHrZYTEncbeMsIYvRKtMmWB0TCGi8-11r55sIW1bQAYyExJMePgX9O0zQDGsmlF_s?encodeFailures=1&width=1072&height=679)
 
-*Особеноостью в yandex является что terraform пытается пересозать СM после каждого timstamp измениния. Принуждаем его расслабиться  и игнорировать изменения. Также ставим тайм маут при изменении создании записи challange - должна пройти валидация, прежде чем сертифика будет выпущен\перевыпущен*
+*Особеноостью в yandex является то, что terraform пытается пересоздать СM после каждого timstamp измениния. Принуждаем его расслабиться  и игнорировать изменения. Также, ставим таймаут при изменении\создании записи challange - должна пройти валидация, прежде чем сертифика будет выпущен\перевыпущен*
 
 ```hcl
 resource "yandex_dns_recordset" "polar-net-ru" {
