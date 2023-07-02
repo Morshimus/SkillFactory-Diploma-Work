@@ -146,6 +146,35 @@ end
 
 ```
 
+```mermaid
+
+graph TD
+
+    subgraph Local Files
+        local_file_ansible_template --> templatefile --> local_file_ansible_inventory_template
+        local_file_cloud_init_yaml_tpl --> templatefile --> local_file_cloud_init_yaml_tpl
+        local_file_cloud_init_k8s_node_deb_yaml_tpl --> templatefile --> local_file_cloud_init_k8s_node_deb_yaml_tpl
+        local_file_cloud_init_ci_cd_monitor_deb_yaml_tpl --> templatefile --> local_file_cloud_init_ci_cd_monitor_deb_yaml_tpl
+        local_file_raw_secrets_sf_web_app_template --> templatefile --> local_file_raw_secrets_sf_web_app
+        local_file_raw_secrets_infra_template --> templatefile --> local_file_raw_secrets_infra
+        local_file_provisioning_yaml_tpl_template --> templatefile --> local_file_provisioning_yaml
+        local_file_promtail_release_yaml_tpl --> templatefile --> local_file_promtail_release_yaml
+        tls_private_key_key --> local_file_private_key
+    end
+
+    subgraph Destination Files
+        local_file_raw_secrets_infra --> destination_file_raw_secrets_infra.yaml
+        local_file_raw_secrets_sf_web_app --> destination_file_raw_secrets_sf_web_app.yaml
+        local_file_promtail_release_yaml --> destination_file_promtail_release.yaml
+        local_file_provisioning_yaml --> destination_file_provisioning.yaml
+        local_file_ansible_inventory_template --> destination_file_yandex_inventory.ini
+        local_file_private_key --> destination_file_SSH_KEY_FINAL
+    end
+
+
+
+```
+
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
 
