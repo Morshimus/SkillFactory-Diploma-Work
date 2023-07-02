@@ -9,5 +9,17 @@
   gather_facts: yes
   become: yes
   roles:
-     - role: Prometheus    
-       
+     - role: Prometheus
+       vars:
+         node_exporter_targets:
+          - nodeexporter:9100
+          - k8s-cp-polar-001.polar.grp:30091
+          - k8s-worker-polar-002.polar.grp:30091
+         cadvisor_exporter_targets:
+          - cadvisor:8080
+          - k8s-cp-polar-001.polar.grp:9080
+         nginx_exporter_targets:
+          - k8s-cp-polar-001.polar.grp:10254
+         postgresql_exporter_targets:
+          - k8s-cp-polar-001.polar.grp:9187
+         Prometheus_Docker_root: /opt/morsh_monit

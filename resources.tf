@@ -627,9 +627,9 @@ resource "local_file" "raw_secrets_sf_web_app" {
   }
 }
 
-resource "local_file" "monitoring_yaml" {
-  content = local.monitoring_yaml_tpl_template
-  filename = "${path.module}/vars/monitoring.yaml"
+resource "local_file" "provisioning_yaml" {
+  content = local.provisioning_yaml_tpl_template
+  filename = "${path.module}/provisioning.yaml"
 }
 resource "local_file" "yandex_inventory" {
   content  = local.ansible_template

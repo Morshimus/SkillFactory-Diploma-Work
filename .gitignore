@@ -4,6 +4,7 @@
 **/credentials/*
 **/artifacts/*
 # .tfstate files
+provisioning.yaml
 *.tfstate
 *.tfstate.*
 *.lock.hcl
@@ -22,6 +23,7 @@ yandex_cloud.ini
 .tmp
 inventory.ini
 .vault_pass_*
+
 
 # Crash log files
 crash.log

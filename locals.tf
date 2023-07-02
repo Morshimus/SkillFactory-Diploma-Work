@@ -40,7 +40,7 @@ locals {
   k8s_cluster_cp_ip_pub  = length(keys(var.k8s_node_cp.name)) == 1 ? { for i in keys(var.k8s_node_cp.name) : "ip" => module.k8s-node-control-plane[i].external_ip_address_server[0] } : null
   k8s_cluster_cp_ip_priv = length(keys(var.k8s_node_cp.name)) == 1 ? { for i in keys(var.k8s_node_cp.name) : "ip" => module.k8s-node-control-plane[i].internal_ip_address_server[0] } : null
 
-  monitoring_yaml_tpl_template = templatefile( "${path.module}/templates/monitoring.yaml.tpl", {
+  provisioning_yaml_tpl_template = templatefile( "${path.module}/templates/provisioning.yaml.tpl", {
       
       k8s_cluster_cp_name     = local.k8s_cluster_cp_name
       k8s_cluster_node_name = merge(
