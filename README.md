@@ -673,6 +673,44 @@ function kubeseal_refresh {
 }
 ```
 
+> terraform код для сырых секретов
+
+```hcl
+resource "local_file" "raw_secrets_infra" {
+  content  = local.raw_secrets_infra_template
+  filename = "${path.module}/raw_secrets_infra.yaml"
+
+  provisioner "local-exec" {
+    command     = <<EOF
+     . ./actions.ps1;
+     if($(k --insecure-skip-tls-verify get svc  sealed-secrets -n kube-system)){kubeseal_resource -secretfile ./raw_secrets_infra.yaml  -destination './apps/sf-cluster/postgresql' | Out-Null;}
+    EOF
+    interpreter = ["powershell.exe", "-NoProfile", "-c"]
+    environment = {
+      GITHUB_TOKEN = data.ansiblevault_path.github-token.value
+      GITHUB_USER  = data.ansiblevault_path.github-user.value
+    }
+  }
+}
+
+resource "local_file" "raw_secrets_sf_web_app" {
+  content  = local.raw_secrets_sf_web_app_template
+  filename = "${path.module}/raw_secrets_sf_web_app.yaml"
+
+  provisioner "local-exec" {
+    command     = <<EOF
+     . ./actions.ps1;
+     if($(k --insecure-skip-tls-verify get svc  sealed-secrets -n kube-system)){kubeseal_resource -secretfile ./raw_secrets_sf_web_app.yaml  -destination "./apps/sf-cluster/sf-web" | Out-Null;}
+    EOF
+    interpreter = ["powershell.exe", "-NoProfile", "-c"]
+    environment = {
+      GITHUB_TOKEN = data.ansiblevault_path.github-token.value
+      GITHUB_USER  = data.ansiblevault_path.github-user.value
+    }
+  }
+}
+```
+
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
