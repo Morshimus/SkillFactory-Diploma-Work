@@ -65,6 +65,47 @@ target_group_skillfactory --> virtual_host_skillfactory
 
 ```
 
+```mermaid
+graph LR
+
+subgraph ComputeInstances
+    ComputeInstances[Compute Instances] -- Contains --> k8s-node-control-plane[k8s-node-control-plane]
+    ComputeInstances -- Contains --> k8s-node-worker[k8s-node-worker]
+    ComputeInstances -- Contains --> k8s-outside-servers[k8s-outside-servers]
+
+    k8s-node-control-plane -- Connects to --> k8s-node-control-plane-instance[k8s-node-control-plane Instance]
+    k8s-node-worker -- Connects to --> k8s-node-worker-instance[k8s-node-worker Instance]
+    k8s-outside-servers -- Connects to --> k8s-outside-servers-instance[k8s-outside-servers Instance]
+
+    k8s-node-control-plane-instance --> k8s-node-control-plane-vm[Virtual Machine]
+    k8s-node-worker-instance --> k8s-node-worker-vm[Virtual Machine]
+    k8s-outside-servers-instance --> k8s-outside-servers-vm[Virtual Machine]
+
+    k8s-node-control-plane-vm --> os-disk-control-plane[OS Disk]
+    k8s-node-worker-vm --> os-disk-worker[OS Disk]
+    k8s-outside-servers-vm --> os-disk-outside-servers[OS Disk]
+
+    os-disk-control-plane --> yandex_compute_disk_control_plane[Yandex Compute Disk]
+    os-disk-worker --> yandex_compute_disk_worker[Yandex Compute Disk]
+    os-disk-outside-servers --> yandex_compute_disk_outside_servers[Yandex Compute Disk]
+
+    yandex_compute_disk_control_plane --> yandex_compute_instance_control_plane[Yandex Compute Instance]
+    yandex_compute_disk_worker --> yandex_compute_instance_worker[Yandex Compute Instance]
+    yandex_compute_disk_outside_servers --> yandex_compute_instance_outside_servers[Yandex Compute Instance]
+
+    yandex_compute_instance_control_plane --> yandex_vpc_subnet_morsh_subnet_a[Yandex VPC Subnet]
+    yandex_compute_instance_worker --> yandex_vpc_subnet_morsh_subnet_a
+    yandex_compute_instance_outside_servers --> yandex_vpc_subnet_morsh_subnet_a
+end
+
+subnet(Subnet) -- Contains --> k8s-node-control-plane
+subnet -- Contains --> k8s-node-worker
+subnet -- Contains --> k8s-outside-servers
+
+subnet --> yandex_vpc_subnet_morsh_subnet_a[Yandex VPC Subnet]
+
+```
+
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
 
