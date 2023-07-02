@@ -186,6 +186,36 @@ graph TD
 
 
 ```
+### Схема Templates
+
+```mermaid
+
+graph TD
+
+    subgraph Compute Instances
+        variable_k8s_node_cp --> compute_instance_k8s_node_cp
+        variable_k8s_node_worker --> compute_instance_k8s_node_worker
+        variable_k8s_outside_servers --> compute_instance_k8s_outside_servers
+    end
+
+    subgraph Templates
+        template_cloud-init-k8s-node-deb --> cloud-init-k8s-node-deb.yaml.tpl
+        template_cloud-init-k8s-node-deb --> cloud-init-k8s-node-deb.yaml.tpl
+        template_cloud-init-ci-cd-monitor-deb --> cloud-init-k8s-node-deb.yaml.tpl
+    end
+
+    compute_instance_k8s_node_cp --> template_cloud-init-k8s-node-deb
+    compute_instance_k8s_node_worker --> template_cloud-init-k8s-node-deb
+    compute_instance_k8s_outside_servers -->template_cloud-init-ci-cd-monitor-deb
+    template_cloud-init-k8s-node-deb --> cloud-init-k8s-node-deb.yaml.tpl
+    template_cloud-init-k8s-node-deb --> cloud-init-k8s-node-deb.yaml.tpl
+    template_cloud-init-ci-cd-monitor-deb --> cloud-init-k8s-node-deb.yaml.tpl
+    cloud-init-k8s-node-deb.yaml.tpl --> compute_instance_k8s_node_cp
+    cloud-init-k8s-node-deb.yaml.tpl --> compute_instance_k8s_node_worker
+    cloud-init-k8s-node-deb.yaml.tpl --> compute_instance_k8s_outside_servers
+
+
+```
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
