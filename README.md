@@ -1227,6 +1227,9 @@ module "internet-alb-virtual-host-skillfactory-project" {
 
 ![image](https://ams03pap004files.storage.live.com/y4m5Fb3fvOKJCl5VmpZrgQOfGaHeJQSO3FQU9cEJMi_A7Q0hxA97vlg1-94kEQO_9gWjeUTVWO_tee-JwSCPXUnm4_mUoKEmTb_NfqR-HKl-uVEURxcHR35TuUeItqcSmgizPETzp8Y1RU0T1dcmQmCOaROcrUKWro3ArfdpmYMi5b-bj9P4cSw-P9p-18w5y-E?encodeFailures=1&width=1631&height=865)
 
+
+## :three: Что просиходит с нашим ингрес контроллером? приложением? бд? нодами?... Promtheus разводи огонь - зови на кострище Loki и Grafana.
+
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
 
