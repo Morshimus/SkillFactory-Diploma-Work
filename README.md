@@ -1099,6 +1099,59 @@ SkillFactory-Diploma-Work
 
 ```
 
+> Для helm установки приложения был выбран путь hpa - Horizontal Pod Autoscaler. Также был настроен ingress nginx порт 80 - skillfactory.polar.net.ru. Пароль берется из Secrets которые управляются sealed. Для всего этого были подняты контроллера в разделе Infra, все Kustomization в apps.yaml в зависимости от infra-controllers - которая описана в infra.yaml в clusters/sf-cluster. 
+
+```shell
+NAME         REFERENCE               TARGETS            MINPODS   MAXPODS   REPLICAS   AGE
+sf-web-app   Deployment/sf-web-app   32%/60%, 10%/50%   2         4         2          2d18h
+```
+
+```ps1
+PS> k --insecure-skip-tls-verify get sealedsecrets -n sf-web-app
+NAME              AGE
+sf-web-app-auth   3d15h
+```
+
+```shell
+  Template:
+    Metadata:
+      Creation Timestamp:  <nil>
+      Labels:
+        app.kubernetes.io/managed-by:      Helm
+        helm.toolkit.fluxcd.io/name:       sf-web-app
+        helm.toolkit.fluxcd.io/namespace:  sf-web-app
+      Name:                                sf-web-app-auth # назначение, имя конечного расшифрованного секрета
+      Namespace:                           sf-web-app
+    Type:                                  Opaque
+```
+
+```yaml
+values:
+    db_name: 'django' # Имя базы данных
+    db_host: 'postgresql.postgresql.svc.cluster.local' # Имя локального сервиса postgresql
+    db_port: '"5432"' # Порт postgresql
+    ingress: # ингресс для нашего сайта
+      enabled: true
+      annotations: 
+        kubernetes.io/ingress.class: nginx
+      hosts:
+        - host: skillfactory.polar.net.ru
+          paths:
+           - path: /
+             pathType: ImplementationSpecific
+    autoscaling: # hpa настройки
+      enabled: true
+      minReplicas: 2
+      maxReplicas: 4
+      targetCPUUtilizationPercentage: 50
+      targetMemoryUtilizationPercentage: 60
+    resources: # лимиты 
+      limits:
+        memory: 200Mi
+        cpu: 100m
+         
+```
+
 ### Пожинаем плоды - наше приложение https://skillfactory.polar.net.ru/polls
 
 ![image](https://ams03pap004files.storage.live.com/y4m5Fb3fvOKJCl5VmpZrgQOfGaHeJQSO3FQU9cEJMi_A7Q0hxA97vlg1-94kEQO_9gWjeUTVWO_tee-JwSCPXUnm4_mUoKEmTb_NfqR-HKl-uVEURxcHR35TuUeItqcSmgizPETzp8Y1RU0T1dcmQmCOaROcrUKWro3ArfdpmYMi5b-bj9P4cSw-P9p-18w5y-E?encodeFailures=1&width=1631&height=865)
