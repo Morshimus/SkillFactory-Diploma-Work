@@ -871,7 +871,7 @@ spec:
 ```
 *По умолчанию мистер Flux, реагирует на изменение версии нашего чарта. Видя что в репозитории появилась новая версия, он немедленно начнет его reconcillation, а потом и апдейт helmrelease объекта.*
 
-> Поговорим о репозитории. Для helm мы сделаем свой Helm репозиторий, используя функционал Github pages, и автоматизируем его обновление. Помимо нашего приложения в репозитории будут еще необходимые элементы - postgresql и pormtail  - но их оставим за мануальным обновлением и правкой ( порой источники на bitnami данных релизов недоступны - блокировка, а версии бывают сломаны).
+> Поговорим о репозитории. Для helm мы сделаем свой Helm репозиторий, используя функционал Github pages, и автоматизируем его обновление. Помимо нашего приложения в репозитории будут еще необходимые элементы - postgresql и pormtail  - но их оставим за мануальным обновлением и правкой ( порой источники на bitnami данных релизов недоступны - блокировка, а версии бывают сломаны). Ссылка на Github в начале проекта.
 
 Repository:
 
@@ -886,8 +886,158 @@ spec:
   url: https://morshimus.github.io/SkillFactory-Diploma-Work-Helm-Charts/
 ```
 
+*Добавим наш новый ребозиторий во Flux*
+
+> Теперь необходимо сделать конвеер который бы тестировал MVP нашего приложения и проводил smoke тесты - Для этого как нельзя кстати подошел kind.
+ - Создаем дефолтный кластер
+ - Устанавливаем postgresql с тестовыми данными - необходим для корректной работы проекта sf-web-app
+ - Делаем helm lint sf-web-app
+ - Делаем helm install -f values-test.yaml  - используем тестовые значения
+ - Ждем установки, делаем helm test - проверяем работоспособность
 
 
+```helm
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "sf-web-app.fullname" . }}-test-connection"
+  labels:
+    {{- include "sf-web-app.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['{{ include "sf-web-app.fullname" . }}:{{ .Values.service.port }}/admin/']
+  restartPolicy: Never
+```
+
+ - Упаковываем, обновляем index.yaml и отправляем в наш Git.
+
+> Pipeline на groovy выглядит так
+
+```groovy
+pipeline {
+    agent {
+       node{
+          label 'agent-secondary'
+        }    
+    }
+    stages {
+        stage('Preparation') { // for display purposes
+            steps {
+                sh 'apk update && apk add curl jq'
+                sh 'curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"'
+                sh 'chmod +x kubectl'
+                sh 'mv kubectl /bin/kubectl'
+                sh '[ $(uname -m) = x86_64 ] && curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.20.0/kind-linux-amd64'
+                sh 'chmod +x ./kind'
+                sh 'mv ./kind /usr/local/bin/kind'
+                sh 'curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3'
+                sh 'chmod 700 get_helm.sh'
+                sh './get_helm.sh && rm ./get_helm.sh'
+                git branch: 'main', url:'https://github.com/Morshimus/SkillFactory-Diploma-Work-Helm-Charts.git'
+            }
+        }
+        stage('Test') {
+            steps {
+                sh 'kind delete cluster'
+                sh 'kind create cluster'
+                sh 'cd sf-web-app && sh ./new_app_version.sh'
+                sh 'helm install --set auth.database=django --set auth.username=admin --set auth.password=test123  my-release oci://registry-1.docker.io/bitnamicharts/postgresql && sleep 30'
+                sh 'cd sf-web-app && helm lint -f values-test.yaml'
+                sh 'cd sf-web-app  && helm install test-sf-web -f values-test.yaml . && sleep 60 && helm test test-sf-web  '
+                sh 'kind delete cluster'
+            }
+        }
+        stage('Release'){
+            steps {
+                sh 'git config --global user.email "morsh110792@yahoo.com"'
+                sh 'git config --global user.name "Daniel"'
+                sh 'cd sf-web-app && sh ./release.sh'
+                sh 'rm -f ./sf-web-app-*tgz'
+                sh 'helm package ./sf-web-app/'
+                sh 'helm package ./postgresql/'
+                sh 'helm package ./promtail/'
+                sh '[ -f ./index.yaml ] ||  helm repo index --url https://morshimus.github.io/SkillFactory-Diploma-Work-Helm-Charts .  ; [ -f ./index.yaml ] &&  helm repo index --url https://morshimus.github.io/SkillFactory-Diploma-Work-Helm-Charts --merge index.yaml .  '
+                sh 'git add .'
+                sh 'git commit -am "Updated new release $(git rev-parse --short HEAD)"'
+            withCredentials([gitUsernamePassword(credentialsId: 'git-deployer-id', gitToolName: 'git-tool')]){
+                sh 'git push --set-upstream origin main'
+            }
+                sh "docker system prune -af"
+            }    
+        }
+    }
+    
+    post {
+        success {
+            withCredentials([string(credentialsId: 'jenkins_polar_bot', variable: 'TOKEN'), string(credentialsId: 'chatWebid', variable: 'CHAT_ID')]) {
+                sh  ("""
+                curl -s -X POST https://api.telegram.org/bot${TOKEN}/sendMessage -d chat_id=${CHAT_ID} -d parse_mode=markdown -d text='\u2705 *${env.JOB_NAME}* : POC *Branch*: ${env.GIT_BRANCH} *Build* : OK *Published* = YES'
+                """)
+            }
+        }
+
+        aborted {
+            withCredentials([string(credentialsId: 'jenkins_polar_bot', variable: 'TOKEN'), string(credentialsId: 'chatWebid', variable: 'CHAT_ID')]) {
+                sh  ("""
+                curl -s -X POST https://api.telegram.org/bot${TOKEN}/sendMessage -d chat_id=${CHAT_ID} -d parse_mode=markdown -d text='\u26a0\ufe0f *${env.JOB_NAME}* : POC *Branch*: ${env.GIT_BRANCH} *Build* : `Aborted` *Published* = `Aborted`'
+                """)
+           }
+        }
+     
+        failure {
+            withCredentials([string(credentialsId: 'jenkins_polar_bot', variable: 'TOKEN'), string(credentialsId: 'chatWebid', variable: 'CHAT_ID')]) {
+                sh  ("""
+                curl -s -X POST https://api.telegram.org/bot${TOKEN}/sendMessage -d chat_id=${CHAT_ID} -d parse_mode=markdown -d text='\u274c *${env.JOB_NAME}* : POC  *Branch*: ${env.GIT_BRANCH} *Build* : `not OK` *Published* = `no`'
+                """)
+            }
+        }
+
+    }
+}
+```
+
+> Не забываем добавить во Flux зависимость sf-web-app от postgresql.
+
+```yaml
+
+apiVersion: kustomize.toolkit.fluxcd.io/v1
+kind: Kustomization
+metadata:
+  name: app-sf-web
+  namespace: flux-system
+spec:
+  interval: 1m0s
+  dependsOn:
+    - name: infra-controllers
+    - name: postgresql
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+  path: ./apps/sf-cluster/sf-web
+  prune: true
+  suspend: false
+  wait: true
+  timeout: 1m0s
+
+```
+
+> Вернемся к секретам - почему нельзя менять данные базы на уже созданном релизе? Потому что postgresql helm устанавливается путем Statefulset с привязкой к существующей pvc, которую создает flux через Kustomization - Наше хранилище имеет определенный путь и при перезатерании паролей, данные на конечном PersistentVolume и StorageClass - не изменятся! Если нужно это сделать и избежать проблем - лучше удалить из Kustomization  postgresql, изменить путь хранилища в PV(старое если нужно, можно удалить ручками на ноде), смeнить секреты через kubeseal - добавить postgresql в Kustomization. Это приведет к простою - поэтому заранее нужно планировать Maintenance часы. Данный кейс не касатся деплоя с 0.
+
+> Нарисуем схему.
+
+```mermaid
+graph LR
+    A[sf-web-app repo] -- changed --> B(Start pipeline django_app jenkins)
+    B -- tests finished --> C{Update docker hub Morshimus with new release}
+    C -- Trigger to start django-helm-chart pipeline --> D(Test finished)
+    D -- Updated github helm repository --> E[Flux updated]
+
+```
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
