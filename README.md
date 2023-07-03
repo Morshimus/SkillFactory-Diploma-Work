@@ -817,6 +817,63 @@ pipeline {
 
 > Ну конечно же куда без оповещений...Настроен телеграм бот.
 
+### django-helm-chart
+
+> B бесспорно самая интересная для меня часть этого проекта - мы делаем свой Helm чарт. Но придется начать из далека..Давайте поймем как будет осуществляться автоматическая доставка нашего чарта.
+
+**Flux спешит на помощь**
+
+Release:
+
+```yaml
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: sf-web-app
+  namespace: sf-web-app
+spec:
+  releaseName: sf-web-app
+  chart:
+    spec:
+      chart: sf-web-app
+      sourceRef:
+        kind: HelmRepository
+        name: sf-web-app
+        namespace: sf-web-app
+  interval: 1m
+  install:
+    remediation:
+      retries: 3
+  values:
+    db_name: 'django'
+    db_host: 'postgresql.postgresql.svc.cluster.local'
+    db_port: '"5432"'
+    ingress:
+      enabled: true
+      annotations: 
+        kubernetes.io/ingress.class: nginx
+      hosts:
+        - host: skillfactory.polar.net.ru
+          paths:
+           - path: /
+             pathType: ImplementationSpecific
+    autoscaling:
+      enabled: true
+      minReplicas: 2
+      maxReplicas: 4
+      targetCPUUtilizationPercentage: 50
+      targetMemoryUtilizationPercentage: 60
+    resources:
+      limits:
+        memory: 200Mi
+        cpu: 100m
+         
+```
+*По умолчанию мистер Flux, реагирует на изменение версии нашего чарта. Видя что в репозитории появилась новая версия, он немедленно начнет его reconcillation, а потом и апдей helmrelease объекта.*
+
+> Поговорим о репозитории. Для helm мы сделаем свой Helm репозиторий использую функционал Github pages, и автоматизируем его обновление. Помимо нашего приложения в репозитории будут еще необходимые элементы - postgresql и pormtail  - но их оставим за мануальным обновлением и правкой ( порой источники на bitnami данных релизов не доступны - блокировка, а версии бывают сломаны).
+
+
 
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
