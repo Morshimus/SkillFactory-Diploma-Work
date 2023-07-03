@@ -1683,7 +1683,7 @@ status:
 
 *Cadvisor metrics:*
 
-![iamge](https://ams03pap004files.storage.live.com/y4mev7Hoi6IIXYYGbgvo_aeQ2Bc5O_jN_4C7OgVnamLmcTxB0mVgEyNWHnzGw8VXMPBqd6DmgLSZ194Tu0rvlVmMPEA3sad4gB9857TWYFJ-K447cfQ8vXwexVHzQAHuJxV4ffRLY4v-Hc0ioEq4jzbXqyW2mUEMIe-Jk2f9zBrY28bvglvabuLZvoFIdxayopp?encodeFailures=1&width=1547&height=865)
+![image](https://ams03pap004files.storage.live.com/y4mev7Hoi6IIXYYGbgvo_aeQ2Bc5O_jN_4C7OgVnamLmcTxB0mVgEyNWHnzGw8VXMPBqd6DmgLSZ194Tu0rvlVmMPEA3sad4gB9857TWYFJ-K447cfQ8vXwexVHzQAHuJxV4ffRLY4v-Hc0ioEq4jzbXqyW2mUEMIe-Jk2f9zBrY28bvglvabuLZvoFIdxayopp?encodeFailures=1&width=1547&height=865)
 
 > Иначе поступаем с nodeexpoerer - деплоим сервис как NodePort и оправшиваем спец порт 30091.
 
@@ -1758,6 +1758,22 @@ tzdata==2023.3
 > C blackbox поступим также - дадим ему внешний адрес - так как он для такого рода сбора метрик и предназначен.
 
 ### И самое приятное.Смотрим дашборды.
+
+![image](https://ams03pap004files.storage.live.com/y4mVXt48lAA4CaDe6uyTdLkeO2Eu772oLXIeBbO8QDGJMj4SXQsEW1DOwzPnmDA5lLwNM8hkOTEj_1kWKx1uOs_QqrQsKyIN-j5Jmpn3dLzcMbx1IsLLEGK5EhSiYDwgnY2kaxRStfV-me2sRJNA6AOFKMsZh9BES-aP_1lYW6pdR6dmmx_YlTbw8g3kB_KQn0s?encodeFailures=1&width=1656&height=865)
+
+![image](https://ams03pap004files.storage.live.com/y4mwfflwMDFNid266BZXfpETmUNzsq1JAtoPx9j0V12UC9pLJ7VtnlR0UjPAXv3T2CPnUsO2pAO1nOUZSkYn296wmKrs0oEi4I5lCxzd59Yeva0b7zhfVeNOfc5LLGUXmyzOSRWfZQL6DjlVGKELp4jBb51C3FlNFENtCd_K3owDWvUP12w2KFcmMk4L4GLaUN1?encodeFailures=1&width=1545&height=865)
+
+![image](https://ams03pap004files.storage.live.com/y4mZ7r1GF9ja-2k1QUAKGZzL7DmoheJvcL_nmfCWtlxsLMWQgWTB7YxRn_NdMPpkPkmk4mWFvI9rMEK3rkXjHWRjuy6o0DytWryh6ajpVC2Uh3l42BOwyt2VpmowWYjzcCBllES4fxnSrk1aG3S0L5I_yZ8MfsGOUv2T3Ib2s3suJOfFd4mx16R11QYmwEijPav?encodeFailures=1&width=1596&height=865)
+
+![image](https://ams03pap004files.storage.live.com/y4m_Y1sN5VlSJut-_AO-9dHbMue6JkIj9JU8RfvIIZxbE-AOhH49ltvLR9T3sLI38Ze9HwJUezqBg7N1IFkFUcIxQUwRMVDz4cIS4f_TBbbFD3i7D0V1E7TucuVBIpYHWP7_CaiD2Lv6NueTtF4ey2hTCY9Z5Jp2myHAekK3CSljYqvTl7ItY3ne7jcT_-0a0lH?encodeFailures=1&width=1586&height=865)
+
+![image](https://ams03pap004files.storage.live.com/y4mrTQ7eQ1jmEkuWAqbFYrwOAwgOpDJgg40i-lTFvuIjjOih3znw0PVm-yqRz-dMDvIPm8a6TU91DZ_bQHbCo_Vk-Ur3dE2nhz_ttQMf9eQPPmLptU6wRMt91hwjlBJMuQNImeYu_iaOfjPi-gvhLw1gkgtK-jjxcRs0FDsJsb5n-b1YQzCW1elwQwQyaTsvYe5?encodeFailures=1&width=1557&height=865)
+
+![image](https://ams03pap004files.storage.live.com/y4mc7XYgRJDjIB4qJP004OVAqgAlL61rhigqsoEi9XkCqL81VeqHbLH6I_t4k_N1vt2BBCuCDipYHD57WaE2HAgg5mJ_rzl87YxX4D39w-6jXjaaXPasw3alL15PokzU2ws4GxfLT88yZLTdTmemT0cpGkfw4VPxI-w6L29ZCVOIcQ-KDJXZKlOIJ-9mJCcJFPr?encodeFailures=1&width=1562&height=865)
+
+![image](https://ams03pap004files.storage.live.com/y4m8BiDTZLy9SASsrrs4SRijE3bhrV_LWh1dcZbjOiH3p71UcjUtuQ1UWX7MtkEOHgx9NzBPl719EmUpSl-k33IX5MENAMxHldm1XLitW_4zGtJ5eeZQO6LhxB-ArUwcYv1sH1g4dyscOX3OP3Va9K190fe6yecP-AT9q4s_uAQ9FobC0MUFvkoACuPVeZc9WON?encodeFailures=1&width=1628&height=865)
+
+![image](https://ams03pap004files.storage.live.com/y4mGEbpTCHu4EOzUz93uquFI44SnLPFUNO1GkPMPlrM53m5l4EqX8412qjgfVrYOEv487ruvFB5fCNC1edl4yCIxWYVs8Se8gERnXanja1Y3jv0n_pxg4O-D944zADHoKF9FXjNOX_qw0ldiz5HmSHAj5lvqnEJEPxqB1sOhCU5FKXMA2uFEGu8Q3-GqVHQHufk?encodeFailures=1&width=1649&height=865)
 
 ## :four: Заключение
 
