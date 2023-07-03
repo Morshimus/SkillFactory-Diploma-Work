@@ -1045,6 +1045,59 @@ graph LR
 > Также не забываем назначить расписание на периодическую сборку нашего приложения, для поддержания актуальности.
 ![image](https://ams03pap004files.storage.live.com/y4mQY4eQoY4VLiFEQr1LtXie5Vu_O4CrK0BHNY7y_a7JEhnk5uFNkOBNo3bP87w-uOY1Om3xaJrj18mOczk5hR29vKtH-wIumNY_uQlUy4rojs4wGZJG59R6VolzV-QuwknT4DcqFonijkXMp5jciojhcWbd1dxKmBFPGywLF4wZeSI1lWF8IzcNstkI4XgcDuS?encodeFailures=1&width=1332&height=363)
 
+> При планировании архитектуры Flux, был использован пример - https://github.com/fluxcd/flux2-kustomize-helm-example. Flux tree будет выглядеть так:
+
+```tree
+SkillFactory-Diploma-Work
+├── apps
+│   └── sf-cluster
+│       ├── cadvisor
+│       │   ├── kustomization.yaml
+│       │   ├── namespace.yaml
+│       │   ├── release.yaml
+│       │   └── repository.yaml
+│       ├── postgresql
+│       │   ├── kustomization.yaml
+│       │   ├── namespace.yaml
+│       │   ├── persistentvolume.yaml
+│       │   ├── persistentvolumeclaims.yaml
+│       │   ├── release.yaml
+│       │   ├── repository.yaml
+│       │   ├── sealed-secrets.yaml
+│       │   └── storageclass.yaml
+│       ├── prometheus-node-exporter
+│       │   ├── kustomization.yaml
+│       │   ├── namespace.yaml
+│       │   ├── release.yaml
+│       │   └── repository.yaml
+│       ├── promtail
+│       │   ├── kustomization.yaml
+│       │   ├── namespace.yaml
+│       │   ├── release.yaml
+│       │   └── repository.yaml
+│       └── sf-web
+│           ├── kustomization.yaml
+│           ├── namespace.yaml
+│           ├── release.yaml
+│           ├── repository.yaml
+│           └── sealed-secrets.yaml
+├── infra
+│   └── sf-cluster
+│       └── controllers
+│           ├── ingress-nginx.yaml
+│           ├── kustomization.yaml
+│           ├── metric-server.yaml
+│           └── sealed-server.yaml
+├── clusters
+│   └── sf-cluster
+│       ├── apps.yaml
+│       ├── flux-system
+│       │   ├── gotk-components.yaml
+│       │   ├── gotk-sync.yaml
+│       │   └── kustomization.yaml
+│       └── infra.yaml
+
+```
 
 ### Пожинаем плоды - наше приложение https://skillfactory.polar.net.ru/polls
 
