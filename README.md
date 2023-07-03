@@ -1154,6 +1154,75 @@ values:
          
 ```
 
+> И конечно же настраиваем ALB для нашего приложения.
+
+```hcl
+module "internet-alb-backend-skillfactory-project" {
+
+  source = "git::https://github.com/Morshimus/Terraform-Yandex-Cloud-Application-Load-Balancer-Backend-Group-Module?ref=tags/1.1.3"
+
+  name        = "skillfactory"
+  description = "Web site created for Diplom work"
+  group       = "app"
+
+  http_backend = [{
+    name             = "sf-web-app"
+    port             = 80
+    weight           = 1
+    http2            = false
+    target_group_ids = [module.internet-alb-target-group-skillfactory-project.id]
+    load_balancing_config = [{
+      panic_threshold                = 50
+      locality_aware_routing_percent = 20
+      strict_locality                = false
+      mode                           = "ROUND_ROBIN"
+    }]
+  }]
+}
+module "internet-alb-target-group-skillfactory-project" {
+
+  source = "git::https://github.com/Morshimus/Terraform-Yandex-Cloud-Application-Load-Balancer-Target-Group-Module?ref=tags/1.1.1"
+
+  name        = "skillfactory"
+  description = "app"
+  group       = "application"
+
+  target = [
+    for s in keys(local.k8s_cluster_node_ip_priv) :
+    merge({ "ip_address" = lookup(local.k8s_cluster_node_ip_priv, s, "10.0.0.1") }, { "subnet_id" = yandex_vpc_subnet.morsh-subnet-a.id })
+  ]
+
+}
+module "internet-alb-virtual-host-skillfactory-project" {
+
+  source = "git::https://github.com/Morshimus/Terraform-Yandex-Cloud-Application-Load-Balancer-Virtual-Host-Module?ref=tags/1.0.0"
+
+  name           = "skillfactory"
+  authority      = ["skillfactory.polar.net.ru"]
+  http_router_id = module.internet-alb-http-router-project.id
+
+  route = [{
+    name = "sf-web-app"
+    http_route = [{
+      http_match = []
+      http_route_action = [{
+        backend_group_id  = module.internet-alb-backend-skillfactory-project.id
+        timeout           = "60s"
+        host_rewrite      = null
+        auto_host_rewrite = null
+        prefix_rewrite    = null
+        upgrade_types     = []
+        idle_timeout      = null
+      }]
+      redirect_action        = []
+      direct_response_action = []
+    }]
+    grpc_route = []
+  }]
+}
+```
+
+
 ### Пожинаем плоды - наше приложение https://skillfactory.polar.net.ru/polls
 
 ![image](https://ams03pap004files.storage.live.com/y4m5Fb3fvOKJCl5VmpZrgQOfGaHeJQSO3FQU9cEJMi_A7Q0hxA97vlg1-94kEQO_9gWjeUTVWO_tee-JwSCPXUnm4_mUoKEmTb_NfqR-HKl-uVEURxcHR35TuUeItqcSmgizPETzp8Y1RU0T1dcmQmCOaROcrUKWro3ArfdpmYMi5b-bj9P4cSw-P9p-18w5y-E?encodeFailures=1&width=1631&height=865)
