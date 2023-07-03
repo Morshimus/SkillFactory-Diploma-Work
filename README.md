@@ -1677,7 +1677,7 @@ status:
 
 > caadvisor и postgresql агрегирует данные со своих сервисов через Load Balancer - Но порты тоже работают - yesss.
 
-*Postgresl metric:*
+*Postgresql metric:*
 
 ![image](https://ams03pap004files.storage.live.com/y4m9VBsw9FVo9JMcRmJh1FQ1EaPS05wI6G-F8riEoqOiKhnIeBlsmWLqHUCn2SlAOCOdN5cwx0STxgc6Lp_sUUWeDMvKUkUPxdEzcRaADouXOrvO2-szLJzdMF4DJJdShC_iOCH-hpNgcq6cygVhaUIEwkGAXx83ACp3ruBbAfN1tL-AV0h1AnuNm-It-E5a3Co?encodeFailures=1&width=1319&height=865)
 
@@ -1705,6 +1705,56 @@ status:
 *PS Ментор, я понимаю разницу между этими подходами, и далее будет еще 3ий подход. Что не нужно строго отделять - пихаем в LoadBalance nginx контроллера :)*
 
 > И наконец то - нам нужны метрики самого приложения - Django..С чего начать.. А начать нужно с приложения и установить в него эти метрики.
+
+```python3
+INSTALLED_APPS = [
+    ...
+    'django_prometheus',
+    ...
+]
+```
+
+
+```python3
+MIDDLEWARE = [
+    'django_prometheus.middleware.PrometheusBeforeMiddleware',
+     ...
+    'django_prometheus.middleware.PrometheusAfterMiddleware',
+]
+```
+
+*requriments.txt for pip:*
+
+```txt
+asgiref==3.6.0
+backports.zoneinfo==0.2.1
+configparser==5.3.0
+Django==4.1.6
+django-prometheus==2.3.1
+prometheus-client==0.17.0
+psycopg2==2.9.5
+sqlparse==0.4.3
+tzdata==2023.3
+```
+
+**Отправляем измения в репозиторий и наш Jenkins выкатываем helm релиз, который потом деплоит Flux.**
+
+> Так как у нас настроен ingress до skillfactory.polat.net.ru - роль и добавляем этот адрес в конфиг django_exporter Prometheus
+
+```yaml
+  - job_name: 'django_exporter'
+    scrape_interval: 10s
+    scheme: https
+    static_configs:
+      - targets: 
+          - skillfactory.polat.net.ru
+```
+
+> Пробуем взять метрики. Есть!
+
+![image](https://ams03pap004files.storage.live.com/y4mUYb29HjrdqCtQz7Z-Eo3C0HmTv9IeEGrwY_sVXzKgFdUKry3q8ppcZ-IlidMp_RUorTYGPAp77FyNswqyveEJBDe-a8OqnTRI-W1Q2dt9M8hbDw3c18Au32uLdLWDXTWTCDCRdIc2-sde1U-ZeuU8E21X6FW6SX2jH8cbLb3N41g2mJCmxk48-jfjdKd78ZQ?encodeFailures=1&width=380&height=216)
+
+*PS Ментор, я знаю что в проде лучше защищать такие странички прокси паролем, но в данной работе, я напротив, не хотел этого делать, чтобы были доказательства работы django exporter*
 
 ## :four: Заключение
 
