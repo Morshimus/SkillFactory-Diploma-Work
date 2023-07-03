@@ -14,8 +14,8 @@
 
 <details><summary><b>Разделы:</b></summary>
 
-- [0.Схемы Terraform Ифраструктуры](https://github.com/Morshimus/SkillFactory-Diploma-Work/edit/main/README.md#zero-%D1%81%D1%85%D0%B5%D0%BC%D0%B0-virtual-privat-cloud-network)
-- [1.Описание Terraform Инфраструктуры](https://github.com/Morshimus/SkillFactory-Diploma-Work/edit/main/README.md#one-%D0%B7%D0%BD%D0%B0%D0%BA%D0%BE%D0%BC%D1%81%D1%82%D0%B2%D0%BE-%D1%81-%D0%B8%D0%BD%D1%84%D1%80%D0%B0%D1%81%D1%82%D1%80%D1%83%D0%BA%D1%82%D1%83%D1%80%D0%BE%D0%B9)
+- [0.Схемы Terraform Ифраструктуры](https://github.com/Morshimus/SkillFactory-Diploma-Work#zero-%D1%81%D1%85%D0%B5%D0%BC%D0%B0-virtual-privat-cloud-network)
+- [1.Описание Terraform Инфраструктуры](https://github.com/Morshimus/SkillFactory-Diploma-Work#one-%D0%B7%D0%BD%D0%B0%D0%BA%D0%BE%D0%BC%D1%81%D1%82%D0%B2%D0%BE-%D1%81-%D0%B8%D0%BD%D1%84%D1%80%D0%B0%D1%81%D1%82%D1%80%D1%83%D0%BA%D1%82%D1%83%D1%80%D0%BE%D0%B9)
 - [2.Описание процесса CI\CD](https://github.com/Morshimus/SkillFactory-Diploma-Work/edit/main/README.md#two-jenkins-%D0%BF%D0%BE%D0%BC%D0%BE%D0%B3%D0%B0%D0%B9-%D1%81%D1%82%D1%80%D0%BE%D0%B8%D0%BC-pipeline-%D0%BD%D0%B0-jenkins-%D0%B2-k8s-cluster)
 - [3.Описание Мониторинга](https://github.com/Morshimus/SkillFactory-Diploma-Work/edit/main/README.md#three-%D1%87%D1%82%D0%BE-%D0%BF%D1%80%D0%BE%D1%81%D0%B8%D1%85%D0%BE%D0%B4%D0%B8%D1%82-%D1%81-%D0%BD%D0%B0%D1%88%D0%B8%D0%BC-%D0%B8%D0%BD%D0%B3%D1%80%D0%B5%D1%81-%D0%BA%D0%BE%D0%BD%D1%82%D1%80%D0%BE%D0%BB%D0%BB%D0%B5%D1%80%D0%BE%D0%BC-%D0%BF%D1%80%D0%B8%D0%BB%D0%BE%D0%B6%D0%B5%D0%BD%D0%B8%D0%B5%D0%BC-%D0%B1%D0%B4-%D0%BD%D0%BE%D0%B4%D0%B0%D0%BC%D0%B8-promtheus-%D1%80%D0%B0%D0%B7%D0%B2%D0%BE%D0%B4%D0%B8-%D0%BE%D0%B3%D0%BE%D0%BD%D1%8C---%D0%B7%D0%BE%D0%B2%D0%B8-%D0%BD%D0%B0-%D0%BA%D0%BE%D1%81%D1%82%D1%80%D0%B8%D1%89%D0%B5-loki-%D0%B8-grafana)
 - [4.Заключение](https://github.com/Morshimus/SkillFactory-Diploma-Work/edit/main/README.md#four-%D0%B7%D0%B0%D0%BA%D0%BB%D1%8E%D1%87%D0%B5%D0%BD%D0%B8%D0%B5)
