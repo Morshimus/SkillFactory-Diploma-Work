@@ -817,6 +817,8 @@ pipeline {
 
 > Ну конечно же куда без оповещений...Настроен телеграм бот.
 
+![image](https://ams03pap004files.storage.live.com/y4mWioKe-n3UHX3MIFpobDRrM1U1hCvRJnXFuKThFYdOrc0uLMtSX-bsXWynmM2bgxDk6fX4KP7vlLOBA3eKAzsEaGbIOWrGykx64XcECBgBtDaKhuTtaZJj4NpjZwmxMOzbvJIU411Sasz0z3PEmbfEfxYgaeXW8NqWtcQ62UDJAn0Zv0L0BY0hmfyElFeTTpw?encodeFailures=1&width=469&height=865)
+
 ### django-helm-chart
 
 > И бесспорно самая интересная для меня часть этого проекта - мы делаем свой Helm чарт. Но придеться начать издалека..Давайте поймем как будет осуществляться автоматическая доставка нашего чарта.
