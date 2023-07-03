@@ -228,7 +228,7 @@ graph TD
     template_cloud-init-k8s-node-deb --> cloud-init-k8s-node-deb.yaml.tpl
     template_cloud-init-ci-cd-monitor-deb --> cloud-init-k8s-node-deb.yaml.tpl
     template_cloud-init-k8s-node-deb --> compute_instance_k8s_node_cp
-    template_cloud-init-k8s-node-deb --> compute_instance_k8s_node_cp
+    template_cloud-init-k8s-node-deb --> compute_instance_k8s_node_worker
     template_cloud-init-ci-cd-monitor-deb --> compute_instance_k8s_outside_servers
 
 
