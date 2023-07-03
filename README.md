@@ -1039,6 +1039,8 @@ graph LR
 
 ```
 
+> Мы не делаем триггера на отслеживание репозитория helm - так как получится бесконечная петля. Вместо этого helm pipeline следит за успешным выполенинем django_app. По сути мы реализовали Werf.
+
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
 
