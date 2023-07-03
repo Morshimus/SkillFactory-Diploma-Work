@@ -1675,7 +1675,7 @@ status:
 > Вуаля, nginx игресс контроллер теперь имеет метрики если обратиться к ноде
 ![image](https://ams03pap004files.storage.live.com/y4ml5VCLQ-IinsaQVGtAZOBda8V5Lvpvxd3eWCPbt0f4M2S2EI6H-_LZ3t4YipZpUZSXqkkCBvBIjxRVk0-XN04OooLPDoHHJj2HwScD7XXHGrN0M5M0UZqtpaPmG51xoVFGIGOtTETqEPLV1b6g57sLw4NzYES0W-cdq8EtSV4jvY2lDsm00EaUI-ROTtHpNyr?encodeFailures=1&width=1638&height=865)
 
-> caadvisor и postgresql агрегирует данные со своих сервисов через Load Balancer - Но порты тоже работают - yesss.
+- cadvisor и postgresql агрегирует данные со своих сервисов через Load Balancer - Но порты тоже работают - yesss.
 
 *Postgresql metric:*
 
@@ -1704,7 +1704,81 @@ status:
 
 *PS Ментор, я понимаю разницу между этими подходами, и далее будет еще 3ий подход. Что не нужно строго отделять - пихаем в LoadBalance nginx контроллера :)*
 
-> И наконец то - нам нужны метрики самого приложения - Django..С чего начать.. А начать нужно с приложения и установить в него эти метрики.
+- Promtail настраиваем через шаблонизацию терраформа.
+
+```tpl
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: promtail
+  namespace: promtail
+spec:
+  releaseName: promtail
+  chart:
+    spec:
+      chart: promtail
+      sourceRef:
+        kind: HelmRepository
+        name: promtail
+        namespace: promtail
+  interval: 1m
+  install:
+    remediation:
+      retries: 3
+%{ if monitoring_member_name != null}
+  values:
+    config:
+       clients:
+%{ for index, server in external_servers_name ~}
+%{ if lookup(monitoring_member_name ,  index , false) != false }            - url: http://${server}:3100/loki/api/v1/push          
+%{ else }
+%{ endif }
+%{ endfor ~}
+
+%{ else }
+%{ endif }
+```
+
+```hcl
+resource "local_file" "promtail_release_yaml" {
+  content  = local.promtail_release_yaml_tpl
+  filename = "${path.module}/apps/sf-cluster/promtail/release.yaml"
+
+  provisioner "local-exec" {
+    command     = "git add . ; git commit -am 'Updated promtail release.'; git push"
+    interpreter = ["powershell.exe", "-NoProfile", "-c"]
+  }
+}
+```
+
+```yaml
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: promtail
+  namespace: promtail
+spec:
+  releaseName: promtail
+  chart:
+    spec:
+      chart: promtail
+      sourceRef:
+        kind: HelmRepository
+        name: promtail
+        namespace: promtail
+  interval: 1m
+  install:
+    remediation:
+      retries: 3
+
+  values:
+    config:
+       clients:
+            - url: http://srv-ext-polar-003.polar.grp:3100/loki/api/v1/push      # Адрес приватного DNS yandex VPC.     
+
+```
+
+- И наконец то - нам нужны метрики самого приложения - Django..С чего начать.. А начать нужно с приложения и установить в него эти метрики.
 
 ```python3
 INSTALLED_APPS = [
@@ -1739,7 +1813,7 @@ tzdata==2023.3
 
 **Отправляем измения в репозиторий и наш Jenkins выкатываем helm релиз, который потом деплоит Flux.**
 
-> Так как у нас настроен ingress до skillfactory.polat.net.ru - роль и добавляем этот адрес в конфиг django_exporter Prometheus
+> Так как у нас настроен ingress до skillfactory.polat.net.ru - роль  добавляет этот адрес в конфиг django_exporter Prometheus
 
 ```yaml
   - job_name: 'django_exporter'
@@ -1755,7 +1829,7 @@ tzdata==2023.3
 
 *PS Ментор, я знаю что в проде лучше защищать такие странички прокси паролем, но в данной работе, я напротив, не хотел этого делать, чтобы были доказательства работы django exporter*
 
-> C blackbox поступим также - дадим ему внешний адрес - так как он для такого рода сбора метрик и предназначен.
+- C blackbox поступим также - дадим ему внешний адрес - так как он для такого рода сбора метрик и предназначен.
 
 ### И самое приятное.Смотрим дашборды.
 
