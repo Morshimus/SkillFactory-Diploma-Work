@@ -1433,7 +1433,278 @@ alerting:
 > Конфигурации dashboards и прочие статические настройки были заархиварованы и добавлены в Release на соотвуствующей роли gihub странице.
 ![image](https://ams03pap004files.storage.live.com/y4m4-TAsdl8kHxMcEbTARBJwd7C3OMf55pPqgA_WueQH83-4uglui-Xd0Yi7W0UIA5GlP7pZiWZgwj369p3e31hrUXK9OevO-CyRl3o0ElKlZla3waoU5wtbTPZVAWheWY7-f5CA65KUdwW2trds4VU8h-mDyrTmuMESgtPiOlJFeydcP3PT_ZTK9_U5K9lpZv-?encodeFailures=1&width=1771&height=712)
 
-> 
+> Loki Datasource был статически добавлен в этот же архив в раздел Grafana.
+
+```yaml
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    orgId: 1
+    url: http://prometheus:9090
+    basicAuth: false
+    isDefault: true
+    editable: true
+
+  - name: Loki
+    type: loki
+    access: proxy
+    orgId: 1
+    url: http://loki:3100
+    basicAuth: false
+    isDefault: false
+    editable: true
+```
+
+> Для снятия локальных метрик хостовой системы и логов были установлены локально exportеры и promtail.
+
+```yaml
+node_exporter_targets:
+          - nodeexporter:9100
+cadvisor_exporter_targets:
+          - cadvisor:8080
+```
+```yaml
+  promtail:
+    image: grafana/promtail:2.3.0
+    container_name: promtail
+    volumes:
+      - /var/log:/var/log
+    command: -config.file=/etc/promtail/config.yml
+    networks:
+      - monitor-net
+    logging: *logging
+    labels:
+      org.label-schema.group: "monitoring"
+    deploy:  
+      resources: *resources_common
+```
+
+> И мы переходим к самому интересному. Чтобы брать метрики с k8s кластера нам необходимо
+
+- Установить экспортеры и лог коллекторы на ноды - это касается nodeexporter - так как мы хотим иметь возможность понимать какое собщение с какой ноды пришло. Сервисы которые устанавливаются как Daemon set и присутствуют на всех нодах - такие как ingress-nginx, promtail, nodeexporter - настраиваем через сервис nginx controller - а сам nginx controller просим слать метрики с каждого инстанса сервиса. В итоге получаем следующий конфиг ingress-nginx.yaml
+```yaml
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: ingress-nginx
+  labels:
+    toolkit.fluxcd.io/tenant: sre-team
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ingress-nginx
+  namespace: ingress-nginx
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+spec:
+  type: LoadBalancer # балансируем нагрузку между инстансами nginx контроллера
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+      protocol: TCP
+    - name: https
+      port: 443
+      targetPort: 443
+      protocol: TCP
+    - name: cadvisor
+      port: 9080
+      targetPort: 9080
+      protocol: TCP
+    - name: pgexporter
+      port: 9187
+      targetPort: 9187
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+---
+apiVersion: v1
+kind: ConfigMap # Это очень важный пункт, мы делаем форвординг до сервисов мониторинга где не важна нода, а важен инстанс.
+metadata:
+  name: tcp-services
+  namespace: ingress-nginx
+data:
+  "9187": postgresql/postgresql-metrics:9187  
+  "9080": cadvisor/cadvisor:8080
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    app.kubernetes.io/name: ingress-nginx
+    app.kubernetes.io/part-of: ingress-nginx
+  name: ingress-nginx-controller
+  namespace: ingress-nginx
+spec:
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ingress-nginx
+      app.kubernetes.io/part-of: ingress-nginx
+  template:
+    metadata:
+      annotations:
+        prometheus.io/port: "10254"  # Указываем в аноттации что мы хотмс брать метрики с порта 10254
+        prometheus.io/scrape: "true"
+      labels:
+        app.kubernetes.io/name: ingress-nginx
+        app.kubernetes.io/part-of: ingress-nginx
+    spec:
+      containers:
+      - args:
+        - /nginx-ingress-controller
+        - --configmap=$(POD_NAMESPACE)/ingress-nginx
+        - --tcp-services-configmap=$(POD_NAMESPACE)/tcp-services  # Добавляем дополнительные TCP порты в конфиг через LUA
+        - --udp-services-configmap=$(POD_NAMESPACE)/udp-services
+        - --annotations-prefix=nginx.ingress.kubernetes.io
+        - --ingress-class=nginx
+        env:
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.name
+        - name: POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        - name: LD_PRELOAD
+          value: /usr/local/lib/libmimalloc.so
+        image: registry.k8s.io/ingress-nginx/controller:v1.7.1
+        imagePullPolicy: IfNotPresent
+        lifecycle:
+          preStop:
+            exec:
+              command:
+              - /wait-shutdown
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /healthz
+            port: 10254
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+        name: ingress-nginx-controller
+        ports:
+        - containerPort: 80
+          hostPort: 80
+          name: http
+          protocol: TCP
+        - containerPort: 443
+          hostPort: 443
+          name: https
+          protocol: TCP
+        - containerPort: 10254
+          hostPort: 10254
+          name: metrics
+          protocol: TCP
+        - containerPort: 9080
+          hostPort: 9080
+          name: cadvisor
+          protocol: TCP
+        - containerPort: 9187
+          hostPort: 9187
+          name: pgexporter
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /healthz
+            port: 10254
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+        resources: {}
+        securityContext:
+          allowPrivilegeEscalation: true
+          capabilities:
+            add:
+            - NET_BIND_SERVICE
+            drop:
+            - ALL
+          runAsUser: 101
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      nodeSelector:
+        kubernetes.io/os: linux
+      priorityClassName: k8s-cluster-critical
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: ingress-nginx
+      serviceAccountName: ingress-nginx
+      terminationGracePeriodSeconds: 300
+      tolerations:
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/master
+        operator: Equal
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/control-plane
+        operator: Equal
+  updateStrategy:
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+    type: RollingUpdate
+status:
+  currentNumberScheduled: 2
+  desiredNumberScheduled: 2
+  numberAvailable: 2
+  numberMisscheduled: 0
+  numberReady: 2
+  observedGeneration: 1
+  updatedNumberScheduled: 2
+
+
+```
+
+> Вуаля, nginx игресс контроллер теперь имеет метрики если обратиться к ноде
+![image](https://ams03pap004files.storage.live.com/y4ml5VCLQ-IinsaQVGtAZOBda8V5Lvpvxd3eWCPbt0f4M2S2EI6H-_LZ3t4YipZpUZSXqkkCBvBIjxRVk0-XN04OooLPDoHHJj2HwScD7XXHGrN0M5M0UZqtpaPmG51xoVFGIGOtTETqEPLV1b6g57sLw4NzYES0W-cdq8EtSV4jvY2lDsm00EaUI-ROTtHpNyr?encodeFailures=1&width=1638&height=865)
+
+> caadvisor и postgresql агрегирует данные со своих сервисов через Load Balancer - Но порты тоже работают - yesss.
+
+*Postgresl metric:*
+
+![image](https://ams03pap004files.storage.live.com/y4m9VBsw9FVo9JMcRmJh1FQ1EaPS05wI6G-F8riEoqOiKhnIeBlsmWLqHUCn2SlAOCOdN5cwx0STxgc6Lp_sUUWeDMvKUkUPxdEzcRaADouXOrvO2-szLJzdMF4DJJdShC_iOCH-hpNgcq6cygVhaUIEwkGAXx83ACp3ruBbAfN1tL-AV0h1AnuNm-It-E5a3Co?encodeFailures=1&width=1319&height=865)
+
+*Cadvisor metrics:*
+
+![iamge](https://ams03pap004files.storage.live.com/y4mev7Hoi6IIXYYGbgvo_aeQ2Bc5O_jN_4C7OgVnamLmcTxB0mVgEyNWHnzGw8VXMPBqd6DmgLSZ194Tu0rvlVmMPEA3sad4gB9857TWYFJ-K447cfQ8vXwexVHzQAHuJxV4ffRLY4v-Hc0ioEq4jzbXqyW2mUEMIe-Jk2f9zBrY28bvglvabuLZvoFIdxayopp?encodeFailures=1&width=1547&height=865)
+
+> Иначе поступаем с nodeexpoerer - деплоим сервис как NodePort и оправшиваем спец порт 30091.
+
+```yaml
+  values:    
+    service:
+     type: NodePort
+     port: 9100
+     targetPort: 9100
+     nodePort: 30091
+     portName: metrics
+    listenOnAllInterfaces: true
+    annotations:
+     prometheus.io/scrape: "true"
+```
+
+![image](https://ams03pap004files.storage.live.com/y4mFfYbs7kBMrA5NUrEJrPgxIQn0-despRbFFF2xWa9s6RIhmDZI68fOyEtXFr6czGFWlA4YUcDv8FeGKCVqEKAiNcBsDXoMcZqibLQov7nqX6MQuuGritLqVfWjGEXK1KrVBOw2n_k-I37FV2Y5ezJVLzmQQHT6y3ndFAuF56EZd5Nz6ArQloxAtwShXAO_9Zt?encodeFailures=1&width=1506&height=865)
+
+*PS Ментор, я понимаю разницу между этими подходами, и далее будет еще 3ий подход. Что не нужно строго отделять - пихаем в LoadBalance nginx контроллера :)*
+
+> И наконец то - нам нужны метрики самого приложения - Django..С чего начать.. А начать нужно с приложения и установить в него эти метрики.
 
 ## :four: Заключение
 
