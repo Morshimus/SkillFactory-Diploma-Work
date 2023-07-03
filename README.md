@@ -713,13 +713,110 @@ resource "local_file" "raw_secrets_sf_web_app" {
 
 ## :two: Jenkins, помогай. Строим Pipeline на Jenkins в K8S cluster.
 
-> И вот мы плавно переходим к настройке нашего конвеера. Jenkins был выбран не в силу каких либо убеждений - а в силу того что был при обучении проект который так и просился стать CD в кубер.
+> И вот мы плавно переходим к настройке нашего конвеера. Jenkins был выбран не в силу каких либо убеждений - а в силу того что был при обучении проект который так и просился стать CD в кубер. Агенты настроены с образом dind -  поэтому ограничение автоматизации - только наша фантазия. Имеем 2 агента:
+
+*Второй агент будет поднимать k8s кластер на kind. Поэтому дадим ему ресурсов..*
+
+```yaml
+
+x-agent-1-cpu: &Agent_1_CPU "${DOCKER_agent_1_CPUS:-1}"
+x-agent-1-mem: &Agent_1_MEM "${DOCKER_agent_1_MEMORY:-512MB}"
+x-agent-2-cpu: &Agent_2_CPU "${DOCKER_agent_2_CPUS:-2}"
+x-agent-2-mem: &Agent_2_MEM "${DOCKER_agent_2_MEMORY:-1536MB}"
+
+```
 
 *Наш адрес.Ментор - можно зайти на логин page.*
 
 ### https://jenkins.polar.net.ru
 
 ![image](https://ams03pap004files.storage.live.com/y4mzycMWLoLztYSBtUnojTlX1bSJBMB-Kn_J2yUAMibOsdjNOysWp06uud92y7OH9AdjZBQBLJba4UFcOD495glzTf8QSZx5h_rLFnK4fC4q3VdWGg1E5RVVNLk1r3Rw9bWTL7YorZo3C9eO8KiY7k3mrtCczA1x1cW9kOC19uxsYguyOF0p8i7tfX0Ikq9UiX-?encodeFailures=1&width=1614&height=865)
+
+> Давайте рассмотрим наши конвееры, что мы делаем в каждом конкретном случае. И начнем с самого первого и основного..
+
+### django_app
+
+> Создан для сборки приложения на Django (ссылка дана выше). Trigger -  push действия в репозиторий - новые коммиты. Для ведения подробной версионности реализован shell  запрос к API docker hub репозитория (моего личного).
+
+```shell
+
+export latest=$(curl https://hub.docker.com/v2/repositories/morsh92/skillfactory-web-pg/tags?page_size=2 -H "Accept: application/json" | jq .[] | jq .[] | jq -r .name | awk "END{print}" );export add=0.1;export new_version=$(echo  "${latest}+${add}" | bc -l)
+
+```
+> Скрипт берет последнюю версю tag, и добавляет к ней 0.1 - нам это понадобиться в дальнейшем, чтобы безопасно организовать СD в кубер. Далее выполняется docker push. Pipline на groovy выглядит так:
+
+```groovy
+pipeline {
+    agent {
+       node{
+          label 'agent-primary'
+        }    
+    }
+    stages {
+        stage('Preparation') { // for display purposes
+            steps {
+                git branch: 'main', url:'https://github.com/Morshimus/SkillFactory-Diploma-Work-Web-App.git'
+                sh 'apk update && apk add ansible curl jq'
+                sh 'cd /tmp && ansible-playbook provision.yaml'
+            }
+        }
+        stage('Build') {
+            steps {
+                sh 'export latest=$(curl https://hub.docker.com/v2/repositories/morsh92/skillfactory-web-pg/tags?page_size=2 -H "Accept: application/json" | jq .[] | jq .[] | jq -r .name | awk "END{print}" );export add=0.1;export new_version=$(echo  "${latest}+${add}" | bc -l);docker build -t morsh92/skillfactory-web-pg:latest -t morsh92/skillfactory-web-pg:$new_version .'
+            }
+        }
+        stage('Test'){
+            steps {
+                sh 'docker rm django-tst -f'
+                sh 'docker run --rm --name django-tst -e DJANGO_DB_NAME=django_test -e DJANGO_DB_USER=django -e DJANGO_DB_PASSWORD=test123 -e DJANGO_DB_HOST=172.17.0.1 -e DJANGO_DB_PORT=5432 -p 8000:8000 -d morsh92/skillfactory-web-pg:latest'
+                sh 'sleep 30 && wget http://localhost:8000/admin && rm admin'
+                sh 'docker rm django-tst -f'
+            }    
+        }
+        stage('Release') {
+            steps {
+            withCredentials([usernamePassword(credentialsId: 'docker-hub', passwordVariable: 'dockerpwd', usernameVariable: 'dockerusr')]) {
+                    sh "docker login -u ${dockerusr} -p ${dockerpwd}"
+                    sh "docker push morsh92/skillfactory-web-pg:latest"
+                    sh 'export latest=$(curl https://hub.docker.com/v2/repositories/morsh92/skillfactory-web-pg/tags?page_size=2 -H "Accept: application/json" | jq .[] | jq .[] | jq -r .name | awk "END{print}" );export add=0.1;export new_version=$(echo  "${latest}+${add}" | bc -l);docker push morsh92/skillfactory-web-pg:$new_version'
+                    sh "docker logout && rm /home/jenkins/.docker/config.json"
+                    sh "docker system prune -af"
+                }
+            }
+        }
+    }
+    post {
+        success {
+            withCredentials([string(credentialsId: 'jenkins_polar_bot', variable: 'TOKEN'), string(credentialsId: 'chatWebid', variable: 'CHAT_ID')]) {
+                sh  ("""
+                curl -s -X POST https://api.telegram.org/bot${TOKEN}/sendMessage -d chat_id=${CHAT_ID} -d parse_mode=markdown -d text='\u2705 *${env.JOB_NAME}* : POC *Branch*: ${env.GIT_BRANCH} *Build* : OK *Published* = YES'
+                """)
+            }
+        }
+
+        aborted {
+            withCredentials([string(credentialsId: 'jenkins_polar_bot', variable: 'TOKEN'), string(credentialsId: 'chatWebid', variable: 'CHAT_ID')]) {
+                sh  ("""
+                curl -s -X POST https://api.telegram.org/bot${TOKEN}/sendMessage -d chat_id=${CHAT_ID} -d parse_mode=markdown -d text='\u26a0\ufe0f *${env.JOB_NAME}* : POC *Branch*: ${env.GIT_BRANCH} *Build* : `Aborted` *Published* = `Aborted`'
+                """)
+           }
+        }
+     
+        failure {
+            withCredentials([string(credentialsId: 'jenkins_polar_bot', variable: 'TOKEN'), string(credentialsId: 'chatWebid', variable: 'CHAT_ID')]) {
+                sh  ("""
+                curl -s -X POST https://api.telegram.org/bot${TOKEN}/sendMessage -d chat_id=${CHAT_ID} -d parse_mode=markdown -d text='\u274c *${env.JOB_NAME}* : POC  *Branch*: ${env.GIT_BRANCH} *Build* : `not OK` *Published* = `no`'
+                """)
+            }
+        }
+
+    }
+}
+
+```
+
+> Ну конечно же куда без оповещений...Настроен телеграм бот.
+
 
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
