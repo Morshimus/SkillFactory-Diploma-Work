@@ -1244,6 +1244,11 @@ module "internet-alb-virtual-host-skillfactory-project" {
 
 ## :three: Что просиходит с нашим ингрес контроллером? приложением? бд? нодами?... Promtheus разводи огонь - зови на кострище Loki и Grafana.
 
+> В первой главе мы затронули отчасти настройку Prometheus stack но в детали не вникали. Давайте же познакомимся с ними.
+
+### Привет Grafana https://grafana.polar.net.ru
+
+![image](https://ams03pap004files.storage.live.com/y4mWNkca89X27GgbFtj0YDW4sIesMVdteDUyRfX2We2BWqNDTNwSaDLzafkOfZfaRICMMpoUIFYMnZFKuB4y-Fo9EkVWMufDvH46lEGQmEgoKNxOD_zaVKtpQapBgWM2JBiqAS37ySq1rQxO6d28q4iOqPnC16Wdkq1iGkIqs2xaVlm2FRde6t2ZygzSEpZjL0F?encodeFailures=1&width=1749&height=865)
 
 ## :four: Заключение
 
