@@ -490,7 +490,8 @@ module "k8s-node-control-plane" {
 
   for_each = var.k8s_node_cp.name
 
-  source_image_family = "ubuntu-2204-lts"
+  source_image_id = "fd8ebb4u1u8mc6fheog1"
+  source_image_family = null
   boot_disk = {
     initialize_params = {
       size = var.os_disk_size
@@ -528,8 +529,8 @@ module "k8s-node-worker" {
   source = "git::https://github.com/Morshimus/yandex-cloud-instance-module?ref=tags/1.1.2"
 
   for_each = var.k8s_node_worker.name
-
-  source_image_family = "ubuntu-2204-lts"
+  source_image_id = "fd8ebb4u1u8mc6fheog1"
+  source_image_family = null
   boot_disk = {
     initialize_params = {
       size = var.os_disk_size
@@ -561,8 +562,8 @@ module "k8s-outside-servers" {
 
   for_each = var.k8s_outside_srv.name
 
-
-  source_image_family = "ubuntu-2204-lts"
+  source_image_id = "fd8ebb4u1u8mc6fheog1"
+  source_image_family = null
   boot_disk = {
     initialize_params = {
       size = var.os_disk_size
