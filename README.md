@@ -711,7 +711,16 @@ resource "local_file" "raw_secrets_sf_web_app" {
 }
 ```
 
-## :two: Jenkins, помогай. Строим Pipline на Jenkins в K8S cluster.
+## :two: Jenkins, помогай. Строим Pipeline на Jenkins в K8S cluster.
+
+> И вот мы плавно переходим к настройке нашего конвеера. Jenkins был выбран не в силу каких либо убеждений - а в силу того что был при обучении проект который так и просился стать CD в кубер.
+
+*Наш адрес.Ментор - можно зайти на логин page.*
+
+### https://jenkins.polar.net.ru
+
+![image](https://ams03pap004files.storage.live.com/y4mzycMWLoLztYSBtUnojTlX1bSJBMB-Kn_J2yUAMibOsdjNOysWp06uud92y7OH9AdjZBQBLJba4UFcOD495glzTf8QSZx5h_rLFnK4fC4q3VdWGg1E5RVVNLk1r3Rw9bWTL7YorZo3C9eO8KiY7k3mrtCczA1x1cW9kOC19uxsYguyOF0p8i7tfX0Ikq9UiX-?encodeFailures=1&width=1614&height=865)
+
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
