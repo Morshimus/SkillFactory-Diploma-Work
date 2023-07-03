@@ -1851,6 +1851,8 @@ tzdata==2023.3
 
 ## :four: Заключение
 
+![image](https://nkhdiq.am.files.1drv.com/y4mzRwMts2CSZcHEhX3Vi6h9ubMjADGL5UE450KMsRJtboEMYi9Nk1hcZufJm-gXnsRHMO3aIKZ5Z6WLxKII17mzW34_2wmC98h1_Aeqe87ZlgXoLifRWxcOm-XopYRilylVir14bUlGeUqQtBsb2gIx6tvqxjgTrM1-_Hh9yKr-Fug-tSvhsSCKu4TmkZPZEyS5mIYzGz0AeaNHllJyYyb7g)
+
 ## :five:
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
