@@ -1853,6 +1853,11 @@ tzdata==2023.3
 
 ![image](https://nkhdiq.am.files.1drv.com/y4mzRwMts2CSZcHEhX3Vi6h9ubMjADGL5UE450KMsRJtboEMYi9Nk1hcZufJm-gXnsRHMO3aIKZ5Z6WLxKII17mzW34_2wmC98h1_Aeqe87ZlgXoLifRWxcOm-XopYRilylVir14bUlGeUqQtBsb2gIx6tvqxjgTrM1-_Hh9yKr-Fug-tSvhsSCKu4TmkZPZEyS5mIYzGz0AeaNHllJyYyb7g)
 
+Это был долгий путь. Мы прошли от контейнера до k8s кластера и GitOps.
+Хочу сказать спасибо Skillfactory, что вы дали мне верное направление и правильные инструменты.
+Также отдельное спасибо нашим менторам - особенно Владиславу Маркову.
+
+
 ## :five:
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
