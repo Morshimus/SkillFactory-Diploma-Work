@@ -1751,8 +1751,7 @@ tzdata==2023.3
 ```
 
 > Пробуем взять метрики. Есть!
-
-![image](https://ams03pap004files.storage.live.com/y4mUYb29HjrdqCtQz7Z-Eo3C0HmTv9IeEGrwY_sVXzKgFdUKry3q8ppcZ-IlidMp_RUorTYGPAp77FyNswqyveEJBDe-a8OqnTRI-W1Q2dt9M8hbDw3c18Au32uLdLWDXTWTCDCRdIc2-sde1U-ZeuU8E21X6FW6SX2jH8cbLb3N41g2mJCmxk48-jfjdKd78ZQ?encodeFailures=1&width=380&height=216)
+![image](https://ams03pap004files.storage.live.com/y4mUYb29HjrdqCtQz7Z-Eo3C0HmTv9IeEGrwY_sVXzKgFdUKry3q8ppcZ-IlidMp_RUorTYGPAp77FyNswqyveEJBDe-a8OqnTRI-W1Q2dt9M8hbDw3c18Au32uLdLWDXTWTCDCRdIc2-sde1U-ZeuU8E21X6FW6SX2jH8cbLb3N41g2mJCmxk48-jfjdKd78ZQ?encodeFailures=1&width=1521&height=865)
 
 *PS Ментор, я знаю что в проде лучше защищать такие странички прокси паролем, но в данной работе, я напротив, не хотел этого делать, чтобы были доказательства работы django exporter*
 
