@@ -1849,6 +1849,10 @@ tzdata==2023.3
 
 ![image](https://ams03pap004files.storage.live.com/y4mGEbpTCHu4EOzUz93uquFI44SnLPFUNO1GkPMPlrM53m5l4EqX8412qjgfVrYOEv487ruvFB5fCNC1edl4yCIxWYVs8Se8gERnXanja1Y3jv0n_pxg4O-D944zADHoKF9FXjNOX_qw0ldiz5HmSHAj5lvqnEJEPxqB1sOhCU5FKXMA2uFEGu8Q3-GqVHQHufk?encodeFailures=1&width=1649&height=865)
 
+### Ах да, куда же без бота..
+
+![image](https://ams03pap004files.storage.live.com/y4mfm8rrOEqZ3UZrxkARCvvVlpFsYqJ8Otcm2ep7PJbJPyu7iWqjL_RZjKEOdF8B8qeGjbDk02eBBXO-Vl9m8JKAw2gwYRd6DfdU23lVplUeEXZIqi-G3tg3og2OXQVSmveMSRV-jMnJ5NFptEh2IRf6gNbIKwnLsS5NBEd_sUqRK7pnzgSdl9xjN_s4Q8bZaYN?encodeFailures=1&width=591&height=865)
+
 ## :four: Заключение
 
 ![image](https://nkhdiq.am.files.1drv.com/y4mzRwMts2CSZcHEhX3Vi6h9ubMjADGL5UE450KMsRJtboEMYi9Nk1hcZufJm-gXnsRHMO3aIKZ5Z6WLxKII17mzW34_2wmC98h1_Aeqe87ZlgXoLifRWxcOm-XopYRilylVir14bUlGeUqQtBsb2gIx6tvqxjgTrM1-_Hh9yKr-Fug-tSvhsSCKu4TmkZPZEyS5mIYzGz0AeaNHllJyYyb7g)
