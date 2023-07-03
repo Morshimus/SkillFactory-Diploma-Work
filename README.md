@@ -1046,6 +1046,10 @@ graph LR
 ![image](https://ams03pap004files.storage.live.com/y4mQY4eQoY4VLiFEQr1LtXie5Vu_O4CrK0BHNY7y_a7JEhnk5uFNkOBNo3bP87w-uOY1Om3xaJrj18mOczk5hR29vKtH-wIumNY_uQlUy4rojs4wGZJG59R6VolzV-QuwknT4DcqFonijkXMp5jciojhcWbd1dxKmBFPGywLF4wZeSI1lWF8IzcNstkI4XgcDuS?encodeFailures=1&width=1332&height=363)
 
 
+### Пожинаем плоды - наше приложение https://skillfactory.polar.net.ru/polls
+
+![image](https://ams03pap004files.storage.live.com/y4m5Fb3fvOKJCl5VmpZrgQOfGaHeJQSO3FQU9cEJMi_A7Q0hxA97vlg1-94kEQO_9gWjeUTVWO_tee-JwSCPXUnm4_mUoKEmTb_NfqR-HKl-uVEURxcHR35TuUeItqcSmgizPETzp8Y1RU0T1dcmQmCOaROcrUKWro3ArfdpmYMi5b-bj9P4cSw-P9p-18w5y-E?encodeFailures=1&width=1631&height=865)
+
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
 
