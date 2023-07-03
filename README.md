@@ -1250,6 +1250,191 @@ module "internet-alb-virtual-host-skillfactory-project" {
 
 ![image](https://ams03pap004files.storage.live.com/y4mWNkca89X27GgbFtj0YDW4sIesMVdteDUyRfX2We2BWqNDTNwSaDLzafkOfZfaRICMMpoUIFYMnZFKuB4y-Fo9EkVWMufDvH46lEGQmEgoKNxOD_zaVKtpQapBgWM2JBiqAS37ySq1rQxO6d28q4iOqPnC16Wdkq1iGkIqs2xaVlm2FRde6t2ZygzSEpZjL0F?encodeFailures=1&width=1749&height=865)
 
+> Но прежде чем мы будем погружаться в подготовленные dashboards, давайте начнем сначала. Роль устанавливает кластер посредством docker-compose. Наружу хостовой системы иммет доступ только 1 сервис - alermanagent_bot остальные будут использовать прокси caddy:
+
+```Caddyfile
+:3000 {
+    reverse_proxy grafana:3000  
+}
+
+:3100 {
+    reverse_proxy loki:3100  
+}
+
+:8080 {
+    basicauth  {
+        {$ADMIN_USER} {$ADMIN_PASSWORD_HASH}
+    }    
+    reverse_proxy cadvisor:8080
+}
+
+:9090 {
+    basicauth  {
+        {$ADMIN_USER} {$ADMIN_PASSWORD_HASH}
+    }
+    reverse_proxy prometheus:9090
+}
+
+:9093 {
+    basicauth  {
+        {$ADMIN_USER} {$ADMIN_PASSWORD_HASH}
+    }
+    reverse_proxy alertmanager:9093
+}
+
+:9091 {
+    basicauth  {
+        {$ADMIN_USER} {$ADMIN_PASSWORD_HASH}
+    }    
+    reverse_proxy pushgateway:9091
+}
+
+:9115 {
+    basicauth  {
+        {$ADMIN_USER} {$ADMIN_PASSWORD_HASH}
+    }    
+    reverse_proxy blackbox-exporter:9115
+}
+```
+```yaml
+  caddy:
+    image: caddy:2.6.4
+    container_name: caddy
+    ports:
+      - "3000:3000"
+      - "3100:3100"
+      - "9080:8080"
+      - "9090:9090"
+      - "9093:9093"
+      - "9091:9091"
+      - "9115:9115"
+    volumes:
+      - ./PrometheusStack/caddy:/etc/caddy
+    environment: *Admin_ENV
+    restart: unless-stopped
+    networks:
+      - monitor-net
+    logging: *logging
+    labels:
+      org.label-schema.group: "monitoring"
+    deploy:  
+      resources: *resources_common
+```
+
+> У Grafana и Loki не делаем авторизацию - Loki и так будет принимать конфиги только из приватной сети, а Графана имеет свою авторизацию.
+
+> Как было сказано ранее по шаблону в роли был создан scrape конфиг из темплейта jinja2:
+
+```jinja2
+global:
+  scrape_interval:     15s
+  evaluation_interval: 15s
+
+  # Attach these labels to any time series or alerts when communicating with
+  # external systems (federation, remote storage, Alertmanager).
+  external_labels:
+      monitor: 'k8s-project'
+
+rule_files:
+  - "alert.rules"
+
+scrape_configs:
+  - job_name: 'nodeexporter'
+    scrape_interval: 5s
+    static_configs:
+      - targets: 
+      {% for item in node_exporter_targets %}
+          - {{ item }}
+      {% endfor %}
+
+  - job_name: 'cadvisor'
+    scrape_interval: 5s
+    static_configs:
+      - targets: 
+      {% for item in cadvisor_exporter_targets %}
+          - {{ item }}
+      {% endfor %}
+
+
+  - job_name: 'prometheus'
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'nginx exporter'
+    scrape_interval: 5s
+    static_configs:
+      - targets: 
+      {% for item in nginx_exporter_targets %}
+          - {{ item }}
+      {% endfor %}
+           
+
+  - job_name: 'postgres_exporter'
+    scrape_interval: 50s
+    static_configs:
+      - targets:
+      {% for item in postgresql_exporter_targets %}
+          - {{ item }}
+      {% endfor %}
+
+
+  - job_name: 'django_exporter'
+    scrape_interval: 10s
+    scheme: https
+    static_configs:
+      - targets: 
+      {% for item in django_exporter_targets %}
+          - {{ item }}
+      {% endfor %}
+
+
+  - job_name: 'pushgateway'
+    scrape_interval: 10s
+    honor_labels: true
+    static_configs:
+      - targets: 
+      {% for item in pushgateway_targets  %}
+          - {{ item }}
+      {% endfor %}
+
+  - job_name: blackbox
+    metrics_path: /probe
+    params:
+      module: [http_2xx]
+    static_configs:
+      - targets: 
+      
+      {% for item in blackbox_targets  %}
+          - {{ item }}
+      {% endfor %}
+
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: blackbox-exporter:9115
+
+alerting:
+  alertmanagers:
+  - scheme: http
+    static_configs:
+    - targets:
+      {% for item in alertmanagers_targets  %}
+          - {{ item }}
+      {% endfor %}
+
+
+
+```
+
+> Конфигурации dashboards и прочие статические настройки были заархиварованы и добавлены в Release на соотвуствующей роли gihub странице.
+![image](https://ams03pap004files.storage.live.com/y4m4-TAsdl8kHxMcEbTARBJwd7C3OMf55pPqgA_WueQH83-4uglui-Xd0Yi7W0UIA5GlP7pZiWZgwj369p3e31hrUXK9OevO-CyRl3o0ElKlZla3waoU5wtbTPZVAWheWY7-f5CA65KUdwW2trds4VU8h-mDyrTmuMESgtPiOlJFeydcP3PT_ZTK9_U5K9lpZv-?encodeFailures=1&width=1771&height=712)
+
+> 
+
 ## :four: Заключение
 
 ## :five:
