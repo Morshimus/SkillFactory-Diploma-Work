@@ -20,7 +20,7 @@
 %{ endfor ~}
          cadvisor_exporter_targets:
           - cadvisor:8080
-%{ for index, node in k8s_cluster_node_name ~}
+%{ for index, node in k8s_cluster_cp_name ~}
           - ${node}:9080
 %{ endfor ~}
          nginx_exporter_targets:
